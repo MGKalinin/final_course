@@ -17,6 +17,7 @@ type Coin struct {
 }
 
 // конструктор
+
 func NewCoin(title string, rate float64, date time.Time) (*Coin, error) {
 	//прописать ошибки пустое поле, отрицательное значение
 	if title == "" {
