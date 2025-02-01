@@ -5,7 +5,6 @@ import (
 	"final_course/internal/entities"
 )
 
-// здесь интерфейс клиента
 // Client описывает интерфейс для получения данных о курсах валют
 
 type Client interface {

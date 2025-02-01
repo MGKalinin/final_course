@@ -1,7 +1,7 @@
 package entities
 
 import (
-	"errors"
+	"github.com/pkg/errors"
 	"time"
 )
 
@@ -21,10 +21,10 @@ type Coin struct {
 func NewCoin(title string, rate float64, date time.Time) (*Coin, error) {
 	//прописать ошибки пустое поле, отрицательное значение
 	if title == "" {
-		return nil, errors.New("get errors") //обработка пакетом из github errors wrap
+		return nil, errors.Wrap(errors.New("Пустое название криптовалюты"), "NewCoin failed")
 	}
 	if rate < 0 {
-		return nil, error
+		return nil, errors.Wrap(errors.New("Отрицательный курс криптовалюты"), "NewCoin failed")
 	}
 	return &Coin{Title: title, Rate: rate, Date: date}, nil
 }

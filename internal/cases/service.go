@@ -7,7 +7,7 @@ type Service struct {
 	client  Client
 }
 
-// NewService создает новый сервис
+// NewService конструктор - создает новый сервис
 func NewService(storage Storage, client Client) *Service {
 	//проверить на nil
 	return &Service{storage: storage, client: client}

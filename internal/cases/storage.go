@@ -5,7 +5,6 @@ import (
 	"final_course/internal/entities"
 )
 
-//здесь лежат интерфейс стораджу
 // Storage описывает интерфейс для работы с хранилищем данных
 
 type Storage interface {
