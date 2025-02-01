@@ -1,18 +1,14 @@
 package cases
 
-import (
-	"final_course/adapters"
-)
-
 // Service содержит логику работы сервиса
 
 type Service struct {
-	storage adapters.Storage
-	client  adapters.Client
+	storage Storage //проверить на nil
+	client  Client
 }
 
 // NewService создает новый сервис
-
-func NewService(storage adapters.Storage, client adapters.Client) *Service {
+func NewService(storage Storage, client Client) *Service {
+	//проверить на nil
 	return &Service{storage: storage, client: client}
 }
