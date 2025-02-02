@@ -1,14 +1,14 @@
 package cases
 
 import (
-	"final_course/internal/entities"
+	"final_course/internal/variables"
 	"github.com/pkg/errors"
 )
 
 // Service содержит логику работы сервиса
 
 type Service struct {
-	storage Storage // проверить на nil
+	storage Storage
 	client  Client
 }
 
@@ -16,10 +16,10 @@ type Service struct {
 // проверка на nil
 func NewService(storage Storage, client Client) (*Service, error) {
 	if storage == nil {
-		return nil, errors.Wrap(entities.SomeErr, "storage is nil")
+		return nil, errors.Wrap(variables.SomeErr, "storage is nil")
 	}
 	if client == nil {
-		return nil, errors.Wrap(entities.SomeErr, "client is nil")
+		return nil, errors.Wrap(variables.SomeErr, "client is nil")
 	}
 	return &Service{storage: storage, client: client}, nil
 }
