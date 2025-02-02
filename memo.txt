@@ -1,1 +1,4 @@
+// врапинг ошибок
+https://github.com/pkg/errors
 go get github.com/pkg/errors
+
