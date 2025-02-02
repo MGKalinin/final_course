@@ -2,3 +2,5 @@
 https://github.com/pkg/errors
 go get github.com/pkg/errors
 
+// api крипта
+https://www.cryptocompare.com/cryptopian/api-keys

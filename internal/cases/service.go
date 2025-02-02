@@ -16,10 +16,10 @@ type Service struct {
 // проверка на nil
 func NewService(storage Storage, client Client) (*Service, error) {
 	if storage == nil {
-		return nil, errors.Wrap(entities.Error, "storage is nil")
+		return nil, errors.Wrap(entities.ErrorEntity, "storage is nil")
 	}
 	if client == nil {
-		return nil, errors.Wrap(entities.Error, "client is nil")
+		return nil, errors.Wrap(entities.ErrorEntity, "client is nil")
 	}
 	return &Service{storage: storage, client: client}, nil
 }

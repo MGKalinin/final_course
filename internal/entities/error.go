@@ -7,4 +7,4 @@ import "github.com/pkg/errors"
 
 // TODO: Переименовать var Error в понятное для всех название
 
-var Error = errors.New("Error:")
+var ErrorEntity = errors.New("Error:")

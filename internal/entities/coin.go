@@ -20,10 +20,10 @@ type Coin struct {
 
 func NewCoin(title string, rate float64, date time.Time) (*Coin, error) {
 	if title == "" {
-		return nil, errors.Wrap(Error, "empty name of the cryptocurrency")
+		return nil, errors.Wrap(ErrorEntity, "empty name of the cryptocurrency")
 	}
 	if rate < 0 {
-		return nil, errors.Wrap(Error, "negative cryptocurrency exchange rate")
+		return nil, errors.Wrap(ErrorEntity, "negative cryptocurrency exchange rate")
 	}
 	return &Coin{Title: title, Rate: rate, Date: date}, nil
 }
