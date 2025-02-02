@@ -8,3 +8,5 @@ import "github.com/pkg/errors"
 // TODO: Переименовать var Error в понятное для всех название
 
 var ErrorEntity = errors.New("Error:")
+
+// TODO: едем в клиента- ооп, структура...
