@@ -46,7 +46,7 @@ func (c *APIClient) Get(ctx context.Context, titles []string) ([]entities.Coin, 
 	if err := json.NewDecoder(resp.Body).Decode(&coins); err != nil {
 		return nil, err
 	}
-
+	fmt.Println(coins)
 	return coins, nil
 }
 

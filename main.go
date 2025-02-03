@@ -3,8 +3,6 @@ package main
 import (
 	"context"
 	"final_course/internal/adapters"
-	"final_course/internal/cases"
-	"final_course/internal/cases/"
 	"fmt"
 	"log"
 )
