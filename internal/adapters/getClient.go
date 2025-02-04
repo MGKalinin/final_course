@@ -6,6 +6,7 @@ import (
 	"final_course/internal/entities"
 	"github.com/pkg/errors"
 	"net/http"
+	"strings"
 )
 
 // TODO: реализовать метод Get интерфейса client
@@ -32,6 +33,10 @@ func NewClient(apiKey string, url string) *Client {
 func (c *Client) Get(ctx context.Context, titles []string) ([]entities.Coin, error) {
 	//запрос по адресу
 	url := c.baseURL + "/coins"
+	if len(titles) > 0 {
+		// Добавляем query-параметры (например: ?symbols=BTC,ETH,XRP)
+		url += "?symbols=" + strings.Join(titles, ",")
+	}
 	// создать http запрос
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
