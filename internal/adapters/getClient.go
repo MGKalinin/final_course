@@ -26,6 +26,8 @@ func NewClient(apiKey string, url string) *Client {
 	}
 }
 
+//TODO: исправит  не использование titles []string
+
 // Get реализует метод интерфейса Client
 func (c *Client) Get(ctx context.Context, titles []string) ([]entities.Coin, error) {
 	//запрос по адресу
