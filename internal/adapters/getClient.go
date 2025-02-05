@@ -9,8 +9,6 @@ import (
 	"strings"
 )
 
-// TODO: реализовать метод Get интерфейса client
-
 // структура реализующая интерфейс Client (ключ API & url адрес запроса)
 
 type Client struct {
@@ -26,8 +24,6 @@ func NewClient(apiKey string, url string) *Client {
 		baseURL: url,
 	}
 }
-
-//TODO: исправит  не использование titles []string
 
 // Get реализует метод интерфейса Client
 func (c *Client) Get(ctx context.Context, titles []string) ([]entities.Coin, error) {
