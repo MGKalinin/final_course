@@ -3,21 +3,25 @@ package main
 import (
 	"context"
 	"final_course/internal/adapters/externalclient/cryptocompare"
-	"final_course/internal/cases"
 	"fmt"
 	"log"
+	"net/http"
 )
 
+// TO DO: написать метод get для client
+// TODO: написать метод get для storage-надо чего-то прочитать....
 func main() {
 	// Создаем контекст
 	ctx := context.Background()
 
-	// Инициализируем клиент с API ключом и базовым URL
-	apiKey := "1c5c331d210b7d08b2efe2c0741139b5063317d646e84f3619dd69a25d79f5a5"
-	var client cases.Client = cryptocompare.NewClient(apiKey, "https://api.cryptocompare.com")
+	// Инициализируем HTTP клиент
+	httpClient := &http.Client{}
 
-	// Делаем запрос для получения информации о криптовалюте BTH
-	coins, err := client.Get(ctx, []string{"BTH"})
+	// Инициализируем клиент с базовым URL
+	client := cryptocompare.NewClient(httpClient, "https://min-api.cryptocompare.com")
+
+	// Делаем запрос для получения информации о криптовалютах BTC и ETH
+	coins, err := client.Get(ctx, []string{"BTC", "ETH"})
 	if err != nil {
 		log.Fatalf("Error fetching data: %v", err)
 	}

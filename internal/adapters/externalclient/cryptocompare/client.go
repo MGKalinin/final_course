@@ -7,32 +7,27 @@ import (
 	"github.com/pkg/errors"
 	"net/http"
 	"strings"
+	"time"
 )
 
-// структура реализующая интерфейс Client (ключ API & url адрес запроса)
-//TODO: сделать структуру http клиента
-
+// Client структура реализующая интерфейс Client
 type Client struct {
-	apiKey  string
-	baseURL string
+	httpClient *http.Client
+	baseURL    string
 }
 
-// конструктор, создаёт новый экземпляр Client
-
-func NewClient(apiKey string, url string) *Client {
+// NewClient конструктор, создаёт новый экземпляр Client
+func NewClient(httpClient *http.Client, url string) *Client {
 	return &Client{
-		apiKey:  apiKey, // TODO: ключ не нужен-убрать
-		baseURL: url,
+		httpClient: httpClient,
+		baseURL:    url,
 	}
 }
-
-//TODO: функция get ни хуя не должна создавать
-//TODO: переделать запрос
 
 // Get реализует метод интерфейса Client
 func (c *Client) Get(ctx context.Context, titles []string) ([]entities.Coin, error) {
 	// базовый URL для запроса
-	url := c.baseURL + "/coins"
+	url := c.baseURL + "/data/pricemulti"
 
 	// создаём HTTP GET запрос с контекстом
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
@@ -45,18 +40,15 @@ func (c *Client) Get(ctx context.Context, titles []string) ([]entities.Coin, err
 
 	// Устанавливаем query-параметры
 	if len(titles) > 0 {
-		query.Set("symbols", strings.Join(titles, ","))
+		query.Set("fsyms", strings.Join(titles, ","))
+		query.Set("tsyms", "USD") // Предполагаем, что нам нужны курсы в долларах
 	}
 
 	// Обновляем URL запроса
 	req.URL.RawQuery = query.Encode()
 
-	// добавляем заголовок с API ключом
-	req.Header.Set("Authorization", "Bearer "+c.apiKey)
-
-	// создаём HTTP клиент и выполняем запрос
-	client := &http.Client{}
-	resp, err := client.Do(req)
+	// выполняем запрос
+	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, errors.Wrap(entities.ErrorInvalidParams, "failed to execute request")
 	}
@@ -68,12 +60,22 @@ func (c *Client) Get(ctx context.Context, titles []string) ([]entities.Coin, err
 	}
 
 	// распарсить JSON ответ в слайс структур Coin
-	var coins []entities.Coin
-	if err := json.NewDecoder(resp.Body).Decode(&coins); err != nil {
+	var data map[string]map[string]float64
+	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		return nil, errors.Wrap(entities.ErrorInvalidParams, "failed to decode response")
 	}
+
+	// Преобразуем данные в слайс структур Coin
+	var coins []entities.Coin
+	for symbol, rates := range data {
+		if rate, ok := rates["USD"]; ok {
+			coin, err := entities.NewCoin(symbol, rate, time.Now())
+			if err != nil {
+				return nil, err
+			}
+			coins = append(coins, *coin)
+		}
+	}
+
 	return coins, nil
 }
-
-//TODO: написать метод Get в Storage-чего -то прочитать надо....реализовать на уровне сервиса историю
-// с опциональными функциями
