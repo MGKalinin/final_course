@@ -21,7 +21,7 @@ func main() {
 	client := cryptocompare.NewClient(httpClient, "https://min-api.cryptocompare.com")
 
 	// Делаем запрос для получения информации о криптовалютах BTC и ETH
-	coins, err := client.Get(ctx, []string{"BTC", "ETH"})
+	coins, err := client.Get(ctx, []string{"BTC", "ETH"}) //TODO: завести отдельную переменную-куда записать какие монеты парсить
 	if err != nil {
 		log.Fatalf("Error fetching data: %v", err)
 	}
