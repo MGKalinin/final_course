@@ -18,8 +18,10 @@ func main() {
 	httpClient := &http.Client{}
 
 	// Инициализируем клиент с базовым URL
-	client := cryptocompare.NewClient(httpClient, "https://min-api.cryptocompare.com")
-
+	client, err := cryptocompare.NewClient(httpClient, "https://min-api.cryptocompare.com")
+	if err != nil {
+		log.Fatalf("Error creating client: %v", err)
+	}
 	// Делаем запрос для получения информации о криптовалютах BTC и ETH
 	coins, err := client.Get(ctx, []string{"BTC", "ETH"}) //TODO: завести отдельную переменную-куда записать какие монеты парсить
 	if err != nil {

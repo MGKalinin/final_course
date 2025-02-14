@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"final_course/internal/entities"
+	"fmt"
 	"github.com/pkg/errors"
 	"net/http"
 	"net/url"
@@ -19,11 +20,17 @@ type Client struct {
 }
 
 // NewClient конструктор, создаёт новый экземпляр Client
-func NewClient(httpClient *http.Client, url string) *Client { //TODO: конструктор должен возвращать ошибку
+func NewClient(httpClient *http.Client, url string) (*Client, error) {
+	if httpClient == nil {
+		return nil, errors.Wrap(entities.ErrorInvalidParams, "httpClient cannot be nil")
+	}
+	if url == "" {
+		return nil, errors.Wrap(entities.ErrorInvalidParams, "url cannot be empty")
+	}
 	return &Client{
 		httpClient: httpClient,
 		baseURL:    url,
-	}
+	}, nil
 }
 
 // Get реализует метод интерфейса Client
@@ -47,7 +54,7 @@ func (c *Client) Get(ctx context.Context, titles []string) ([]entities.Coin, err
 	// Cоздаём HTTP GET запрос с контекстом
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.baseURL+"/data/pricemulti", nil)
 	if err != nil {
-		return nil, errors.Wrap(entities.ErrorInvalidParams, "error creating request") //TODO: здесь ошибка парсинга
+		return nil, errors.Wrap(err, "error creating request")
 	}
 	// Обновляем URL запроса
 	req.URL.RawQuery = query.Encode()
@@ -55,19 +62,19 @@ func (c *Client) Get(ctx context.Context, titles []string) ([]entities.Coin, err
 	// Выполняем запрос
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
-		return nil, errors.Wrap(entities.ErrorInvalidParams, "failed to execute request") //TODO: тут другая ошибка-она не внутренняя уже
+		return nil, fmt.Errorf("failed to execute request: %w", err)
 	}
 	defer resp.Body.Close()
 
 	// Проверяем статус ответа
 	if resp.StatusCode != http.StatusOK {
-		return nil, errors.Wrap(entities.ErrorInvalidParams, "failed to get data") //TODO: тут другая ошибка-она не внутренняя уже
+		return nil, fmt.Errorf("failed to get data: %w", err)
 	}
 
 	// Распарсить JSON ответ в слайс структур Coin
 	var data map[string]map[string]float64
 	if err := json.NewDecoder(resp.Body).Decode(&data); err != nil {
-		return nil, errors.Wrap(entities.ErrorInvalidParams, "failed to decode response") //TODO: тут другая ошибка-она не внутренняя уже-errorf
+		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
 
 	// Преобразуем данные в слайс структур Coin
@@ -76,7 +83,7 @@ func (c *Client) Get(ctx context.Context, titles []string) ([]entities.Coin, err
 		if rate, ok := rates["USD"]; ok {
 			coin, err := entities.NewCoin(symbol, rate, time.Now())
 			if err != nil {
-				return nil, err //TODO: ошибка чтоб понятно было что за ошибка-errof
+				return nil, fmt.Errorf("failed to create coin for symbol %s: %w", symbol, err)
 			}
 			coins = append(coins, *coin)
 		}
