@@ -17,13 +17,17 @@ func main() {
 	// Инициализируем HTTP клиент
 	httpClient := &http.Client{}
 
+	// Определяем, какие монеты будем запрашивать
+	coinsToFetch := []string{"BTC", "ETH", "XRP"}
+	//coinsToFetch := []string{}
+
 	// Инициализируем клиент с базовым URL
-	client, err := cryptocompare.NewClient(httpClient, "https://min-api.cryptocompare.com")
+	client, err := cryptocompare.NewClient(httpClient, "https://min-api.cryptocompare.com", coinsToFetch)
 	if err != nil {
 		log.Fatalf("Error creating client: %v", err)
 	}
-	// Делаем запрос для получения информации о криптовалютах BTC и ETH
-	coins, err := client.Get(ctx, []string{"BTC", "ETH"}) //TODO: завести отдельную переменную-куда записать какие монеты парсить
+	// Делаем запрос для получения информации о криптовалютах
+	coins, err := client.Get(ctx, nil) // nil для использования монет по умолчанию
 	if err != nil {
 		log.Fatalf("Error fetching data: %v", err)
 	}
