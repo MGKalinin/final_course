@@ -15,20 +15,38 @@ import (
 //TODO:-get метод достаёт из базы данных
 //TO DO: 1 разобраться с опциональными аргументами; 2 подправить client ; 3 написать любой метод get на уровне storage
 
+// StorageOption определяет функциональную опцию для Storage.
+type StorageOption func(*Storage)
+
+// Storage представляет хранилище данных.
 type Storage struct {
 	db *sql.DB
 }
 
-func NewStorage(db *sql.DB) *Storage {
-	return &Storage{db: db}
+// NewStorage создаёт новый экземпляр Storage с заданными опциями.
+func NewStorage(opts ...StorageOption) *Storage {
+	storage := &Storage{}
+	for _, opt := range opts {
+		opt(storage)
+	}
+	return storage
 }
 
+// WithDB устанавливает базу данных для Storage.
+func WithDB(db *sql.DB) StorageOption {
+	return func(s *Storage) {
+		s.db = db
+	}
+}
+
+// Store сохраняет монеты в базе данных.
 func (s *Storage) Store(ctx context.Context, coins []entities.Coin) error {
 	// Реализация метода Store
 	// TODO: Store кладёт в бд то что притащил client
 	return nil
 }
 
+// Get извлекает монеты из базы данных по заданным заголовкам и опциям.
 func (s *Storage) Get(ctx context.Context, titles []string, opts ...interface{}) ([]entities.Coin, error) {
 	// TODO: здесь метод get для storage? а что делает storage?....fmt print opts
 	fmt.Println("Options:", opts)
