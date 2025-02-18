@@ -17,18 +17,18 @@ import (
 type Client struct {
 	httpClient *http.Client
 	baseURL    string
-	coins      []string // Переменная для хранения списка монет
+	coins      []string // Переменная для хранения списка монет //TODO default.coin что-то типа
 }
 
 // NewClient конструктор, создаёт новый экземпляр Client
-func NewClient(httpClient *http.Client, url string, coins []string) (*Client, error) {
+func NewClient(httpClient *http.Client, url string, coins []string) (*Client, error) { //TODO не coins- titles
 	if httpClient == nil {
 		return nil, errors.Wrap(entities.ErrorInvalidParams, "httpClient cannot be nil")
 	}
 	if url == "" {
 		return nil, errors.Wrap(entities.ErrorInvalidParams, "url cannot be empty")
 	}
-	if len(coins) == 0 {
+	if len(coins) == 0 { //TODO здесь проверка что titles не равен 0-иначе по умолчанию
 		coins = []string{"BTC", "ETH", "LTC"} // Монеты по умолчанию
 	}
 	return &Client{

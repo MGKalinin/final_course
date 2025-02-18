@@ -23,3 +23,5 @@ func NewService(storage Storage, client Client) (*Service, error) {
 	}
 	return &Service{storage: storage, client: client}, nil
 }
+
+// TODO здесь опциональные арнументы -здесь подстановка-передача

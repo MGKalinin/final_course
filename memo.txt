@@ -4,3 +4,6 @@ go get github.com/pkg/errors
 
 // крипта
 https://min-api.cryptocompare.com/documentation
+
+
+бд postress pgx 4 версия
