@@ -8,8 +8,6 @@ import (
 	"net/http"
 )
 
-// TO DO: написать метод get для client
-// TODO: написать метод get для storage-надо чего-то прочитать....
 func main() {
 	// Создаем контекст
 	ctx := context.Background()

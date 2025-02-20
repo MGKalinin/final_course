@@ -17,24 +17,24 @@ import (
 type Client struct {
 	httpClient *http.Client
 	baseURL    string
-	coins      []string // Переменная для хранения списка монет //TODO default.coin что-то типа
+	titles     []string // Переменная для хранения списка монет
 }
 
 // NewClient конструктор, создаёт новый экземпляр Client
-func NewClient(httpClient *http.Client, url string, coins []string) (*Client, error) { //TODO не coins- titles
+func NewClient(httpClient *http.Client, url string, titles []string) (*Client, error) {
 	if httpClient == nil {
 		return nil, errors.Wrap(entities.ErrorInvalidParams, "httpClient cannot be nil")
 	}
 	if url == "" {
 		return nil, errors.Wrap(entities.ErrorInvalidParams, "url cannot be empty")
 	}
-	if len(coins) == 0 { //TODO здесь проверка что titles не равен 0-иначе по умолчанию
-		coins = []string{"BTC", "ETH", "LTC"} // Монеты по умолчанию
+	if len(titles) != 0 {
+		titles = []string{"BTC", "ETH", "LTC"} // Монеты по умолчанию
 	}
 	return &Client{
 		httpClient: httpClient,
 		baseURL:    url,
-		coins:      coins,
+		titles:     titles,
 	}, nil
 }
 
@@ -47,7 +47,7 @@ func (c *Client) Get(ctx context.Context, titles []string) ([]entities.Coin, err
 	if len(titles) > 0 {
 		query.Set("fsyms", strings.Join(titles, ","))
 	} else {
-		query.Set("fsyms", strings.Join(c.coins, ","))
+		query.Set("fsyms", strings.Join(c.titles, ","))
 	}
 	query.Set("tsyms", "USD") // Предполагаем, что нам нужны курсы в долларах
 
