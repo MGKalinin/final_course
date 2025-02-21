@@ -13,7 +13,6 @@ type Service struct {
 }
 
 // NewService конструктор - создает новый сервис
-// проверка на nil
 func NewService(storage Storage, client Client) (*Service, error) {
 	if storage == nil {
 		return nil, errors.Wrap(entities.ErrorInvalidParams, "storage is nil")
@@ -42,18 +41,53 @@ func (a AggFunc) String() string {
 	return [...]string{"", "MAX", "MIN", "AVG"}[a]
 }
 
+// WithMaxFunc функция получения max значения
 func WithMaxFunc() Option {
 	return func(options *Options) {
 		options.FuncType = Max
 	}
 }
 
+// GetMaxRate метод получения max значения
 func (s *Service) GetMaxRate(ctx context.Context, titles []string) ([]entities.Coin, error) {
 	coins, err := s.storage.Get(ctx, titles, WithMaxFunc())
 	if err != nil {
-		return nil, err //TODO заврапать ошибку
+		return nil, errors.Wrap(entities.ErrorInvalidParams, "maximum value is missing")
 	}
 	return coins, nil
 }
 
-//TODO: дописать мин,сред....  TODO: нужен pgx 4 версия и pgx pull ; установить бд; нужна история установления соединения
+//TODO: нужен pgx 4 версия и pgx pull ; установить бд;
+// нужна история установления соединения
+
+// WithMinFunc функция получения min значения
+func WithMinFunc() Option {
+	return func(options *Options) {
+		options.FuncType = Min
+	}
+}
+
+// GetMinRate метод получения min значения
+func (s *Service) GetMinRate(ctx context.Context, titles []string) ([]entities.Coin, error) {
+	coins, err := s.storage.Get(ctx, titles, WithMinFunc())
+	if err != nil {
+		return nil, errors.Wrap(entities.ErrorInvalidParams, "minimum value is missing")
+	}
+	return coins, nil
+}
+
+// WithAvgFunc функция получения avg значения
+func WithAvgFunc() Option {
+	return func(options *Options) {
+		options.FuncType = Avg
+	}
+}
+
+// GetAvgRate метод получения avg значения
+func (s *Service) GetAvgRate(ctx context.Context, titles []string) ([]entities.Coin, error) {
+	coins, err := s.storage.Get(ctx, titles, WithAvgFunc())
+	if err != nil {
+		return nil, errors.Wrap(entities.ErrorInvalidParams, "average value is missing")
+	}
+	return coins, nil
+}
