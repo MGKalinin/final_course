@@ -39,7 +39,7 @@ func (s *Storage) Store(ctx context.Context, coins []entities.Coin) error {
 
 // Get извлекает монеты из базы данных по заданным заголовкам и опциям.
 func (s *Storage) Get(ctx context.Context, titles []string, opts ...interface{}) ([]entities.Coin, error) {
-	// TODO -реализовать сам паттерн-сюда притащить get max/ min/last/avergse -вычисление в бд(написать запросы в бд по соотвующим )-без поднятия бд-есть онлайн бд для проверки
+	// TO DO -реализовать сам паттерн-сюда притащить get max/ min/last/avergse -вычисление в бд(написать запросы в бд по соотвующим )-без поднятия бд-есть онлайн бд для проверки
 	option := GetOption(opts...)
 
 	query := `SELECT * FROM coins WHERE title = ANY($1)`
@@ -76,4 +76,4 @@ func (s *Storage) Get(ctx context.Context, titles []string, opts ...interface{})
 	return coins, nil
 }
 
-//TODO придумать тип опция opts
+//TO DO придумать тип опция opts

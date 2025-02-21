@@ -26,7 +26,7 @@ func NewService(storage Storage, client Client) (*Service, error) {
 	return &Service{storage: storage, client: client}, nil
 }
 
-// TODO здесь опциональные аргументы -здесь подстановка-передача
+// TO DO: здесь опциональные аргументы -здесь подстановка-передача
 
 // GetCoins извлекает монеты с использованием слоя хранилища с опциями.
 func (s *Service) GetCoins(ctx context.Context, titles []string, opts ...cryptocompare.Options) ([]entities.Coin, error) {
