@@ -2,15 +2,13 @@ package cases
 
 import (
 	"context"
-	cryptocompare "final_course/internal/adapters/storage/postgres"
 	"final_course/internal/entities"
 	"github.com/pkg/errors"
 )
 
 // Service содержит логику работы сервиса
-// storage Storage
 type Service struct {
-	storage cryptocompare.Storage
+	storage Storage
 	client  Client
 }
 
@@ -26,9 +24,36 @@ func NewService(storage Storage, client Client) (*Service, error) {
 	return &Service{storage: storage, client: client}, nil
 }
 
-// TO DO: здесь опциональные аргументы -здесь подстановка-передача
+type AggFunc int
 
-// GetCoins извлекает монеты с использованием слоя хранилища с опциями.
-func (s *Service) GetCoins(ctx context.Context, titles []string, opts ...cryptocompare.Options) ([]entities.Coin, error) {
-	return s.storage.Get(ctx, titles, opts...)
+const (
+	_ AggFunc = iota
+	Max
+	Min
+	Avg
+)
+
+type Options struct {
+	FuncType AggFunc
 }
+type Option func(options *Options)
+
+func (a AggFunc) String() string {
+	return [...]string{"", "MAX", "MIN", "AVG"}[a]
+}
+
+func WithMaxFunc() Option {
+	return func(options *Options) {
+		options.FuncType = Max
+	}
+}
+
+func (s *Service) GetMaxRate(ctx context.Context, titles []string) ([]entities.Coin, error) {
+	coins, err := s.storage.Get(ctx, titles, WithMaxFunc())
+	if err != nil {
+		return nil, err //TODO заврапать ошибку
+	}
+	return coins, nil
+}
+
+//TODO: дописать мин,сред....  TODO: нужен pgx 4 версия и pgx pull ; установить бд; нужна история установления соединения

@@ -1,6 +1,6 @@
 //это postgress/storage.go
 
-package cryptocompare
+package storage
 
 import (
 	"context"
@@ -10,34 +10,13 @@ import (
 	"strings"
 )
 
-// Options представляет опции для метода Get.
-type Options struct {
-	CalculationType string
-}
-
-// Storage представляет интерфейс хранилища.
-type Storage struct {
-	db *sql.DB
-}
-
-// GetOption извлекает Options из переменного параметра.
-func GetOption(opts ...interface{}) *Options {
-	if len(opts) == 0 {
-		return &Options{}
-	}
-	if opt, ok := opts[0].(Options); ok {
-		return &opt
-	}
-	return &Options{}
-}
-
 // Store сохраняет монеты в базе данных.
 func (s *Storage) Store(ctx context.Context, coins []entities.Coin) error {
 	// Реализация метода Store
 	return nil
 }
 
-// Get извлекает монеты из базы данных по заданным заголовкам и опциям.
+// Get извлекает монеты из базы данных по заданным заголовкам и опциям.// TODO: opts ...interface{}-заменить на опции
 func (s *Storage) Get(ctx context.Context, titles []string, opts ...interface{}) ([]entities.Coin, error) {
 	// TO DO -реализовать сам паттерн-сюда притащить get max/ min/last/avergse -вычисление в бд(написать запросы в бд по соотвующим )-без поднятия бд-есть онлайн бд для проверки
 	option := GetOption(opts...)
@@ -75,5 +54,3 @@ func (s *Storage) Get(ctx context.Context, titles []string, opts ...interface{})
 
 	return coins, nil
 }
-
-//TO DO придумать тип опция opts
