@@ -1,14 +1,16 @@
 package cases
 
 import (
+	"context"
+	cryptocompare "final_course/internal/adapters/storage/postgres"
 	"final_course/internal/entities"
 	"github.com/pkg/errors"
 )
 
 // Service содержит логику работы сервиса
-
+// storage Storage
 type Service struct {
-	storage Storage
+	storage cryptocompare.Storage
 	client  Client
 }
 
@@ -25,3 +27,8 @@ func NewService(storage Storage, client Client) (*Service, error) {
 }
 
 // TODO здесь опциональные аргументы -здесь подстановка-передача
+
+// GetCoins извлекает монеты с использованием слоя хранилища с опциями.
+func (s *Service) GetCoins(ctx context.Context, titles []string, opts ...cryptocompare.Options) ([]entities.Coin, error) {
+	return s.storage.Get(ctx, titles, opts...)
+}
