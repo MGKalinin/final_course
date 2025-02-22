@@ -35,23 +35,3 @@ func main() {
 		fmt.Printf("Title: %s, Rate: %f, Date: %s\n", coin.Title, coin.Rate, coin.Date)
 	}
 }
-
-//package main
-//
-//import (
-//"database/sql"
-//"final_course/internal/cryptocompare"
-//"log"
-//)
-//
-//func main() {
-//	db, err := sql.Open("postgres", "your-connection-string")
-//	if err != nil {
-//		log.Fatal(err)
-//	}
-//	defer db.Close()
-//
-//	storage := cryptocompare.NewStorage(cryptocompare.WithDB(db))
-//
-//	// Используйте storage для выполнения операций
-//}

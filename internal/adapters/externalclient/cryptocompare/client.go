@@ -28,7 +28,7 @@ func NewClient(httpClient *http.Client, url string, titles []string) (*Client, e
 	if url == "" {
 		return nil, errors.Wrap(entities.ErrorInvalidParams, "url cannot be empty")
 	}
-	if len(titles) != 0 {
+	if len(titles) != 0 { //TODO: почему не равно 0? titles==0 => слайс по умолчанию
 		titles = []string{"BTC", "ETH", "LTC"} // Монеты по умолчанию
 	}
 	return &Client{

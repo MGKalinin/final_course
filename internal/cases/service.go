@@ -57,9 +57,6 @@ func (s *Service) GetMaxRate(ctx context.Context, titles []string) ([]entities.C
 	return coins, nil
 }
 
-//TODO: нужен pgx 4 версия и pgx pull ; установить бд;
-// нужна история установления соединения
-
 // WithMinFunc функция получения min значения
 func WithMinFunc() Option {
 	return func(options *Options) {
