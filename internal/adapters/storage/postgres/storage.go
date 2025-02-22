@@ -8,7 +8,6 @@ import (
 	"final_course/internal/entities"
 	"fmt"
 	"github.com/jackc/pgx/v4/pgxpool"
-	"strings"
 )
 
 // Storage структура реализующая интерфейс Storage
@@ -31,7 +30,7 @@ func NewStorage(db *pgxpool.Pool, titles []string) (*Storage, error) {
 // Store метод сохраняет монеты в бд
 func (s *Storage) Store(ctx context.Context, coins []entities.Coin) error {
 	//TODO:положить запрос в бд-посмотреть результат
-	query := `INSERT INTO coins (title, rate, date)  
+	query := `INSERT INTO prices (title, rate, date)  
 		      VALUES ($1, $2, $3)
 		      ON CONFLICT (title) DO UPDATE
 		      SET rate = EXCLUDED.rate, date = EXCLUDED.date;`
@@ -46,8 +45,43 @@ func (s *Storage) Store(ctx context.Context, coins []entities.Coin) error {
 	return nil
 }
 
-// Get метод извлекает монеты из базы данных
+// Get метод извлекает монеты из бд
 func (s *Storage) Get(ctx context.Context, titles []string, opts ...cases.Option) ([]entities.Coin, error) {
+	options := &cases.Options{}
+	for _, opt := range opts {
+		opt(options)
+	}
+
+	var query string
+	switch options.FuncType {
+	case cases.Max:
+		query = `SELECT title, MAX(rate) as rate, MAX(date) as date FROM prices WHERE title = ANY($1) GROUP BY title`
+	case cases.Min:
+		query = `SELECT title, MIN(rate) as rate, MIN(date) as date FROM prices WHERE title = ANY($1) GROUP BY title`
+	case cases.Avg:
+		query = `SELECT title, AVG(rate) as rate, MAX(date) as date FROM prices WHERE title = ANY($1) GROUP BY title`
+	default:
+		query = `SELECT title, rate, date FROM prices WHERE title = ANY($1)`
+	}
+
+	rows, err := s.db.Query(ctx, query, titles)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute query: %w", err)
+	}
+	defer rows.Close()
+
+	var coins []entities.Coin
+	for rows.Next() {
+		var coin entities.Coin
+		if err := rows.Scan(&coin.Title, &coin.Rate, &coin.Date); err != nil {
+			return nil, fmt.Errorf("failed to scan row: %w", err)
+		}
+		coins = append(coins, coin)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("row iteration error: %w", err)
+	}
 
 	return coins, nil
 }
