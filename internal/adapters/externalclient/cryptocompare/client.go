@@ -41,8 +41,8 @@ func (c *Client) Get(ctx context.Context, titles []string) ([]entities.Coin, err
 		titles == c.defaultTitles
 	}
 	query := rawURL.Query()
-	query.Set("fsyms", "")    //TODO: написать валюты для запроса по умолчанию
-	query.Set("tsyms", "USD") // Предполагаем, что нам нужны курсы в долларах
+	query.Set("fsyms", "") //TODO: написать валюты для запроса по умолчанию
+	query.Set("tsyms", "USD")
 	rawURL.RawQuery = query.Encode()
 	// Cоздаём HTTP GET запрос с контекстом
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.baseURL+"/data/pricemulti", nil) //TODO: c.baseURL+"/data/pricemulti" занусуть в baseURL
