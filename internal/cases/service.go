@@ -88,3 +88,5 @@ func (s *Service) GetAvgRate(ctx context.Context, titles []string) ([]entities.C
 	}
 	return coins, nil
 }
+
+//TODO: реализовать метод вызывает функцию без опций- из title

@@ -12,28 +12,25 @@ import (
 
 // Storage структура реализующая интерфейс Storage
 type Storage struct {
-	titles []string
-	db     *pgxpool.Pool
+	db *pgxpool.Pool
 }
 
 // NewStorage конструктор для создания нового хранилища
-func NewStorage(db *pgxpool.Pool, titles []string) (*Storage, error) {
-	if db == nil {
-		return nil, fmt.Errorf("database connection pool cannot be nil")
+func NewStorage(ctx context.Context, connString string) (*Storage, error) {
+	pool, err := pgxpool.Connect(ctx, connString)
+	if err != nil {
+		//TODO : обработать ошибку, заврапать
 	}
 	return &Storage{
-		titles: titles,
-		db:     db,
+		db: pool,
 	}, nil
 }
 
 // Store метод сохраняет монеты в бд
 func (s *Storage) Store(ctx context.Context, coins []entities.Coin) error {
-	//TODO:положить запрос в бд-посмотреть результат
+	//TODO: prices заменить на coin_base
 	query := `INSERT INTO prices (title, rate, date)  
-		      VALUES ($1, $2, $3)
-		      ON CONFLICT (title) DO UPDATE
-		      SET rate = EXCLUDED.rate, date = EXCLUDED.date;`
+		      VALUES ($1, $2, $3)`
 
 	// Выполняем запрос для каждой монеты
 	for _, coin := range coins {
@@ -54,7 +51,7 @@ func (s *Storage) Get(ctx context.Context, titles []string, opts ...cases.Option
 
 	var query string
 	switch options.FuncType {
-	case cases.Max:
+	case cases.Max: //TODO: заменить на select distict
 		query = `SELECT title, MAX(rate) as rate, MAX(date) as date FROM prices WHERE title = ANY($1) GROUP BY title`
 	case cases.Min:
 		query = `SELECT title, MIN(rate) as rate, MIN(date) as date FROM prices WHERE title = ANY($1) GROUP BY title`
@@ -68,12 +65,12 @@ func (s *Storage) Get(ctx context.Context, titles []string, opts ...cases.Option
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute query: %w", err)
 	}
-	defer rows.Close()
+	defer rows.Close() //TODO: см что прилетит сюда
 
 	var coins []entities.Coin
 	for rows.Next() {
 		var coin entities.Coin
-		if err := rows.Scan(&coin.Title, &coin.Rate, &coin.Date); err != nil {
+		if err := rows.Scan(&coin.Title, &coin.Rate, &coin.Date); err != nil { //TODO: если нет агрегирующей функции то Date не нужна
 			return nil, fmt.Errorf("failed to scan row: %w", err)
 		}
 		coins = append(coins, coin)
