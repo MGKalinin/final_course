@@ -26,3 +26,8 @@ psql -U maksimkalinin -d postgres
 SELECT * FROM prices;
 Отключиться от базы данных
 \q
+
+linux
+Запустите службу PostgreSQL: sudo systemctl start postgresql
+Проверьте статус службы: sudo systemctl status postgresql
+Переключитесь на пользователя PostgreSQL:
