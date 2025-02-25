@@ -89,4 +89,7 @@ func (s *Service) GetAvgRate(ctx context.Context, titles []string) ([]entities.C
 	return coins, nil
 }
 
-//TODO: реализовать метод вызывает функцию без опций- из title
+// GetRatesWithoutOptions метод получения значений без опций
+func (s *Service) GetRatesWithoutOptions(ctx context.Context, titles []string) ([]entities.Coin, error) {
+	return s.client.Get(ctx, titles)
+}

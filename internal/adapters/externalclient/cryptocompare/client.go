@@ -3,17 +3,16 @@ package cryptocompare
 import (
 	"context"
 	"encoding/json"
-	"final_course/internal/entities"
 	"fmt"
-	"github.com/pkg/errors"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
-)
 
-//TODO: поправить импорты-сначала встроенные, твои,потом gihub
+	"final_course/internal/entities"
+	"github.com/pkg/errors"
+)
 
 // Client структура реализующая интерфейс Client
 type Client struct {
@@ -35,17 +34,19 @@ func NewClient(url string, titles []string) (*Client, error) {
 // Get реализует метод интерфейса Client
 func (c *Client) Get(ctx context.Context, titles []string) ([]entities.Coin, error) {
 	rawURL, err := url.Parse(c.baseURL)
-	//if err!=nil.........
-	// Устанавливаем query-параметры
+	if err != nil {
+		return nil, errors.Wrap(err, "error parse")
+	}
+
 	if len(titles) == 0 {
-		titles == c.defaultTitles
+		titles = c.defaultTitles
 	}
 	query := rawURL.Query()
-	query.Set("fsyms", "") //TODO: написать валюты для запроса по умолчанию
+	query.Set("fsyms", "USDT")
 	query.Set("tsyms", "USD")
 	rawURL.RawQuery = query.Encode()
 	// Cоздаём HTTP GET запрос с контекстом
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.baseURL+"/data/pricemulti", nil) //TODO: c.baseURL+"/data/pricemulti" занусуть в baseURL
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.baseURL, nil)
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request")
 	}

@@ -27,7 +27,7 @@ func main() {
 	//coinsToFetch := []string{}
 
 	// Инициализируем клиент с базовым URL
-	client, err := cryptocompare.NewClient(httpClient, "https://min-api.cryptocompare.com", coinsToFetch)
+	client, err := cryptocompare.NewClient(httpClient, "https://min-api.cryptocompare.com/data/pricemulti", coinsToFetch)
 	if err != nil {
 		log.Fatalf("Error creating client: %v", err)
 	}
