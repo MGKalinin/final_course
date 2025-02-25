@@ -7,7 +7,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"strings"
 	"time"
 
 	"final_course/internal/entities"
@@ -63,10 +62,19 @@ func (c *Client) Get(ctx context.Context, titles []string) ([]entities.Coin, err
 		return nil, fmt.Errorf("failed to get data: status code %d", resp.StatusCode)
 	}
 
+	body, err := io.ReadAll(resp.Body) //TODO: это убрать
+	if err != nil {
+		return nil, fmt.Errorf("failed to read response body: %w", err)
+	}
+
 	var data map[string]map[string]float64 //TODO: допилить с анмаршаллингом
 	if err := json.Unmarshal(body, &data); err != nil {
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
+
+	// Выводим данные после анмаршалинга
+	fmt.Printf("Unmarshalled data: %+v\n", data)
+
 	// Преобразуем данные в слайс структур Coin
 	var coins []entities.Coin
 	for title, rates := range data {
