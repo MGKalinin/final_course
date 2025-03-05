@@ -62,18 +62,22 @@ func (c *Client) Get(ctx context.Context, titles []string) ([]entities.Coin, err
 		return nil, fmt.Errorf("failed to get data: status code %d", resp.StatusCode)
 	}
 
-	body, err := io.ReadAll(resp.Body) //TODO: это убрать
+	// Читаем тело ответа
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	var data map[string]map[string]float64 //TODO: допилить с анмаршаллингом
-	if err := json.Unmarshal(body, &data); err != nil {
+	// Выводим сырой JSON-ответ
+	fmt.Println("Raw JSON response:")
+	fmt.Println(string(body))
+
+	// Используем json.NewDecoder для декодирования JSON-ответа
+	decoder := json.NewDecoder(resp.Body)
+	var data map[string]map[string]float64
+	if err := decoder.Decode(&data); err != nil {
 		return nil, fmt.Errorf("failed to decode response: %w", err)
 	}
-
-	// Выводим данные после анмаршалинга
-	fmt.Printf("Unmarshalled data: %+v\n", data)
 
 	// Преобразуем данные в слайс структур Coin
 	var coins []entities.Coin

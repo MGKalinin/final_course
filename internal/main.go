@@ -3,10 +3,9 @@ package main
 import (
 	"context"
 	"final_course/internal/adapters/externalclient/cryptocompare"
-	//storage "final_course/internal/adapters/storage/postgres"
+	"final_course/internal/adapters/storage/postgres"
 	"final_course/internal/cases"
 	"fmt"
-	//"github.com/jackc/pgx/v4/pgxpool"
 	"log"
 	"os"
 )
@@ -18,20 +17,23 @@ func main() {
 	// Создаем контекст
 	ctx := context.Background()
 
-	// Инициализируем HTTP клиент
-	//httpClient := &http.Client{}
-
 	// Определяем, какие монеты будем запрашивать
 	coinsToFetch := []string{"BTC", "ETH", "XRP"}
-	//coinsToFetch := []string{}
 
 	// Инициализируем клиент с базовым URL
 	client, err := cryptocompare.NewClient("https://min-api.cryptocompare.com/data/pricemulti", coinsToFetch)
 	if err != nil {
 		log.Fatalf("Error creating client: %v", err)
 	}
+
+	// Инициализируем хранилище
+	storage, err := storage.NewStorage(ctx, os.Getenv("DATABASE_URL"))
+	if err != nil {
+		log.Fatalf("Error creating storage: %v", err)
+	}
+
 	// Инициализируем сервис
-	service, err := cases.NewService(nil, client)
+	service, err := cases.NewService(storage, client)
 	if err != nil {
 		log.Fatalf("Error creating service: %v", err)
 	}
@@ -43,6 +45,7 @@ func main() {
 	}
 
 	// Выводим результат
+	fmt.Println("Fetched Coins:")
 	for _, coin := range coins {
 		fmt.Printf("Title: %s, Rate: %f, Date: %s\n", coin.Title, coin.Rate, coin.Date)
 	}

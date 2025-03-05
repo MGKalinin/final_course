@@ -8,6 +8,8 @@ import (
 	"final_course/internal/entities"
 	"fmt"
 	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/pkg/errors"
+	"time"
 )
 
 // Storage структура реализующая интерфейс Storage
@@ -19,7 +21,9 @@ type Storage struct {
 func NewStorage(ctx context.Context, connString string) (*Storage, error) {
 	pool, err := pgxpool.Connect(ctx, connString)
 	if err != nil {
-		//TODO : обработать ошибку, заврапать
+		//TO DO : обработать ошибку, заврапать
+		return nil, errors.Wrap(err, "failed to connect to the database")
+
 	}
 	return &Storage{
 		db: pool,
@@ -28,8 +32,8 @@ func NewStorage(ctx context.Context, connString string) (*Storage, error) {
 
 // Store метод сохраняет монеты в бд
 func (s *Storage) Store(ctx context.Context, coins []entities.Coin) error {
-	//TODO: prices заменить на coin_base
-	query := `INSERT INTO prices (title, rate, date)  
+	//TO DO: prices заменить на coin_base
+	query := `INSERT INTO coin_base (title, rate, date)  
 		      VALUES ($1, $2, $3)`
 
 	// Выполняем запрос для каждой монеты
@@ -51,27 +55,35 @@ func (s *Storage) Get(ctx context.Context, titles []string, opts ...cases.Option
 
 	var query string
 	switch options.FuncType {
-	case cases.Max: //TODO: заменить на select distict
-		query = `SELECT title, MAX(rate) as rate, MAX(date) as date FROM prices WHERE title = ANY($1) GROUP BY title`
+	case cases.Max:
+		query = `SELECT DISTINCT ON (title) title, rate, date FROM (SELECT title, rate, date FROM coin_base WHERE title = ANY($1) ORDER BY title, rate DESC, date DESC) AS subquery`
 	case cases.Min:
-		query = `SELECT title, MIN(rate) as rate, MIN(date) as date FROM prices WHERE title = ANY($1) GROUP BY title`
+		query = `SELECT DISTINCT ON (title) title, rate, date FROM (SELECT title, rate, date FROM coin_base WHERE title = ANY($1) ORDER BY title, rate ASC, date ASC) AS subquery`
 	case cases.Avg:
-		query = `SELECT title, AVG(rate) as rate, MAX(date) as date FROM prices WHERE title = ANY($1) GROUP BY title`
+		query = `SELECT title, AVG(rate) as rate, MAX(date) as date FROM coin_base WHERE title = ANY($1) GROUP BY title`
 	default:
-		query = `SELECT title, rate, date FROM prices WHERE title = ANY($1)`
+		query = `SELECT DISTINCT ON (title) title, rate, date FROM coin_base WHERE title = ANY($1) ORDER BY title, rate, date`
 	}
 
 	rows, err := s.db.Query(ctx, query, titles)
 	if err != nil {
 		return nil, fmt.Errorf("failed to execute query: %w", err)
 	}
-	defer rows.Close() //TODO: см что прилетит сюда
+	defer rows.Close()
 
 	var coins []entities.Coin
 	for rows.Next() {
 		var coin entities.Coin
-		if err := rows.Scan(&coin.Title, &coin.Rate, &coin.Date); err != nil { //TODO: если нет агрегирующей функции то Date не нужна
-			return nil, fmt.Errorf("failed to scan row: %w", err)
+		if options.FuncType == cases.Avg {
+			if err := rows.Scan(&coin.Title, &coin.Rate, &coin.Date); err != nil {
+				return nil, fmt.Errorf("failed to scan row: %w", err)
+			}
+		} else {
+			if err := rows.Scan(&coin.Title, &coin.Rate); err != nil {
+				return nil, fmt.Errorf("failed to scan row: %w", err)
+			}
+			// Установите Date в нулевое значение, так как оно не используется
+			coin.Date = time.Time{}
 		}
 		coins = append(coins, coin)
 	}
