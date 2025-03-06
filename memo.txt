@@ -23,6 +23,6 @@ psql -U maksimkalinin -d postgres
 Просмотр всех таблиц
 \dt
 Для просмотра содержимого таблицы
-SELECT * FROM prices;
+SELECT * FROM coin_base;
 Отключиться от базы данных
 \q
