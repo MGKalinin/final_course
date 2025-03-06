@@ -44,6 +44,11 @@ func main() {
 		log.Fatalf("Error fetching data: %v", err)
 	}
 
+	// Сохраняем данные в базе данных
+	if err := storage.Store(ctx, coins); err != nil {
+		log.Fatalf("Error storing data: %v", err)
+	}
+
 	// Выводим результат
 	fmt.Println("Fetched Coins:")
 	for _, coin := range coins {

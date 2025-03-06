@@ -1,5 +1,3 @@
-//это postgress/storage.go
-
 package storage
 
 import (
@@ -9,7 +7,6 @@ import (
 	"fmt"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/pkg/errors"
-	"time"
 )
 
 // Storage структура реализующая интерфейс Storage
@@ -21,9 +18,7 @@ type Storage struct {
 func NewStorage(ctx context.Context, connString string) (*Storage, error) {
 	pool, err := pgxpool.Connect(ctx, connString)
 	if err != nil {
-		//TO DO : обработать ошибку, заврапать
 		return nil, errors.Wrap(err, "failed to connect to the database")
-
 	}
 	return &Storage{
 		db: pool,
@@ -32,8 +27,7 @@ func NewStorage(ctx context.Context, connString string) (*Storage, error) {
 
 // Store метод сохраняет монеты в бд
 func (s *Storage) Store(ctx context.Context, coins []entities.Coin) error {
-	//TO DO: prices заменить на coin_base
-	query := `INSERT INTO coin_base (title, rate, date)  
+	query := `INSERT INTO coin_base (title, rate, date)
 		      VALUES ($1, $2, $3)`
 
 	// Выполняем запрос для каждой монеты
@@ -79,11 +73,9 @@ func (s *Storage) Get(ctx context.Context, titles []string, opts ...cases.Option
 				return nil, fmt.Errorf("failed to scan row: %w", err)
 			}
 		} else {
-			if err := rows.Scan(&coin.Title, &coin.Rate); err != nil {
+			if err := rows.Scan(&coin.Title, &coin.Rate, &coin.Date); err != nil {
 				return nil, fmt.Errorf("failed to scan row: %w", err)
 			}
-			// Установите Date в нулевое значение, так как оно не используется
-			coin.Date = time.Time{}
 		}
 		coins = append(coins, coin)
 	}

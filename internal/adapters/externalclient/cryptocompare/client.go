@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"final_course/internal/entities"
@@ -41,11 +42,12 @@ func (c *Client) Get(ctx context.Context, titles []string) ([]entities.Coin, err
 		titles = c.defaultTitles
 	}
 	query := rawURL.Query()
-	query.Set("fsyms", "USDT")
+	query.Set("fsyms", strings.Join(titles, ",")) // Добавлен параметр fsyms
 	query.Set("tsyms", "USD")
 	rawURL.RawQuery = query.Encode()
+
 	// Cоздаём HTTP GET запрос с контекстом
-	req, err := http.NewRequestWithContext(ctx, http.MethodGet, c.baseURL, nil)
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawURL.String(), nil) // Используем rawURL.String() для создания запроса
 	if err != nil {
 		return nil, errors.Wrap(err, "error creating request")
 	}
@@ -73,15 +75,27 @@ func (c *Client) Get(ctx context.Context, titles []string) ([]entities.Coin, err
 	fmt.Println(string(body))
 
 	// Используем json.NewDecoder для декодирования JSON-ответа
-	decoder := json.NewDecoder(resp.Body)
-	var data map[string]map[string]float64
-	if err := decoder.Decode(&data); err != nil {
+	var response struct {
+		Response       string                        `json:"Response"`
+		Message        string                        `json:"Message"`
+		HasWarning     bool                          `json:"HasWarning"`
+		Type           int                           `json:"Type"`
+		RateLimit      map[string]interface{}        `json:"RateLimit"`
+		Data           map[string]map[string]float64 `json:"Data"`
+		ParamWithError string                        `json:"ParamWithError"`
+	}
+
+	if err := json.Unmarshal(body, &response); err != nil {
 		return nil, fmt.Errorf("failed to decode response: %w", err)
+	}
+
+	if response.Response == "Error" {
+		return nil, fmt.Errorf("API error: %s", response.Message)
 	}
 
 	// Преобразуем данные в слайс структур Coin
 	var coins []entities.Coin
-	for title, rates := range data {
+	for title, rates := range response.Data {
 		if rate, ok := rates["USD"]; ok {
 			coin, err := entities.NewCoin(title, rate, time.Now())
 			if err != nil {
