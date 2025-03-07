@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 )
 
 func main() {
@@ -42,6 +43,12 @@ func main() {
 	coins, err := service.GetRatesWithoutOptions(ctx, coinsToFetch)
 	if err != nil {
 		log.Fatalf("Error fetching data: %v", err)
+	}
+
+	// Устанавливаем текущую дату для новых записей
+	currentDate := time.Now()
+	for i := range coins {
+		coins[i].Date = currentDate
 	}
 
 	// Сохраняем данные в базе данных

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/pkg/errors"
+	"log"
 )
 
 // Storage структура реализующая интерфейс Storage
@@ -27,12 +28,25 @@ func NewStorage(ctx context.Context, connString string) (*Storage, error) {
 
 // Store метод сохраняет монеты в бд
 func (s *Storage) Store(ctx context.Context, coins []entities.Coin) error {
+	tx, err := s.db.Begin(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to begin transaction: %w", err)
+	}
+	defer func() {
+		if err != nil {
+			tx.Rollback(ctx)
+		} else {
+			tx.Commit(ctx)
+		}
+	}()
+
 	query := `INSERT INTO coin_base (title, rate, date)
 		      VALUES ($1, $2, $3)`
 
 	// Выполняем запрос для каждой монеты
 	for _, coin := range coins {
-		_, err := s.db.Exec(ctx, query, coin.Title, coin.Rate, coin.Date)
+		log.Printf("Storing coin: %s with rate: %f on date: %s", coin.Title, coin.Rate, coin.Date)
+		_, err = tx.Exec(ctx, query, coin.Title, coin.Rate, coin.Date)
 		if err != nil {
 			return fmt.Errorf("failed to store coin %s: %w", coin.Title, err)
 		}
