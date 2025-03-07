@@ -15,6 +15,8 @@ type Storage struct {
 	db *pgxpool.Pool
 }
 
+//TODO: нужен метод который идёт в бд и дёргает какие titles есть в бд-передаёт titles вот сюда func (c *Client) Get(ctx context.Context, titles []string) ([]entities.Coin, error) {
+
 // NewStorage конструктор для создания нового хранилища
 func NewStorage(ctx context.Context, connString string) (*Storage, error) {
 	pool, err := pgxpool.Connect(ctx, connString)

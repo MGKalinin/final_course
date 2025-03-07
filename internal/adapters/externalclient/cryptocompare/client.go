@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -64,45 +63,19 @@ func (c *Client) Get(ctx context.Context, titles []string) ([]entities.Coin, err
 		return nil, fmt.Errorf("failed to get data: status code %d", resp.StatusCode)
 	}
 
-	// Читаем тело ответа
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, fmt.Errorf("failed to read response body: %w", err)
-	}
-
-	// Выводим сырой JSON-ответ
-	fmt.Println("Raw JSON response:")
-	fmt.Println(string(body))
-
-	// Используем json.NewDecoder для декодирования JSON-ответа
-	var response struct {
-		Response       string                        `json:"Response"`
-		Message        string                        `json:"Message"`
-		HasWarning     bool                          `json:"HasWarning"`
-		Type           int                           `json:"Type"`
-		RateLimit      map[string]interface{}        `json:"RateLimit"`
-		Data           map[string]map[string]float64 `json:"Data"`
-		ParamWithError string                        `json:"ParamWithError"`
-	}
-
-	if err := json.Unmarshal(body, &response); err != nil {
-		return nil, fmt.Errorf("failed to decode response: %w", err)
-	}
-
-	if response.Response == "Error" {
-		return nil, fmt.Errorf("API error: %s", response.Message)
+	var rates map[string]map[string]float64
+	if err := json.NewDecoder(resp.Body).Decode(&rates); err != nil {
+		return nil, fmt.Errorf("failed to decode response:%w", err)
 	}
 
 	// Преобразуем данные в слайс структур Coin
 	var coins []entities.Coin
-	for title, rates := range response.Data {
-		if rate, ok := rates["USD"]; ok {
-			coin, err := entities.NewCoin(title, rate, time.Now())
-			if err != nil {
-				return nil, fmt.Errorf("failed to create coin for symbol %s: %w", title, err)
-			}
-			coins = append(coins, *coin)
+	for title, cost := range rates {
+		coin, err := entities.NewCoin(title, cost["USD"], time.Now())
+		if err != nil {
+			return nil, fmt.Errorf("failed to create coin:%w", err)
 		}
+		coins = append(coins, *coin)
 	}
 	return coins, nil
 }

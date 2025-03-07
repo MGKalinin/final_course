@@ -12,6 +12,8 @@ type Service struct {
 	client  Client
 }
 
+//TODO: 2.нужен метод который вызывает метод бд который дёргает чего в бд-client get метод кладёт полученные монеты в store в бд
+
 // NewService конструктор - создает новый сервис
 func NewService(storage Storage, client Client) (*Service, error) {
 	if storage == nil {
@@ -89,7 +91,11 @@ func (s *Service) GetAvgRate(ctx context.Context, titles []string) ([]entities.C
 	return coins, nil
 }
 
-// GetRatesWithoutOptions метод получения значений без опций
-func (s *Service) GetRatesWithoutOptions(ctx context.Context, titles []string) ([]entities.Coin, error) {
-	return s.client.Get(ctx, titles)
+// GetLastRates метод получения значений без опций
+func (s *Service) GetLastRates(ctx context.Context, titles []string) ([]entities.Coin, error) {
+	coins, err := s.storage.Get(ctx, titles)
+	if err != nil {
+		return nil, errors.Wrap(entities.ErrorInvalidParams, "last value is missing")
+	}
+	return coins, nil
 }
