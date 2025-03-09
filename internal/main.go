@@ -40,7 +40,7 @@ func main() {
 	}
 
 	// Делаем запрос для получения информации о криптовалютах
-	coins, err := service.GetRatesWithoutOptions(ctx, coinsToFetch)
+	coins, err := service.GetLastRates(ctx, coinsToFetch)
 	if err != nil {
 		log.Fatalf("Error fetching data: %v", err)
 	}
