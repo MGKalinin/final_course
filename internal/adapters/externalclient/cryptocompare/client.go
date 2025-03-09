@@ -38,7 +38,7 @@ func (c *Client) Get(ctx context.Context, titles []string) ([]entities.Coin, err
 	}
 
 	if len(titles) == 0 {
-		titles = c.defaultTitles
+		titles = c.defaultTitles // TODO: добавить список монет по умолчанию
 	}
 	query := rawURL.Query()
 	query.Set("fsyms", strings.Join(titles, ",")) // Добавлен параметр fsyms
