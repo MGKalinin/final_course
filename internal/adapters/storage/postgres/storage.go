@@ -15,8 +15,6 @@ type Storage struct {
 	db *pgxpool.Pool
 }
 
-//TODO: нужен метод который идёт в бд и дёргает какие titles есть в бд-передаёт titles вот сюда func (c *Client) Get(ctx context.Context, titles []string) ([]entities.Coin, error) {
-
 // NewStorage конструктор для создания нового хранилища
 func NewStorage(ctx context.Context, connString string) (*Storage, error) {
 	pool, err := pgxpool.Connect(ctx, connString)
@@ -26,6 +24,33 @@ func NewStorage(ctx context.Context, connString string) (*Storage, error) {
 	return &Storage{
 		db: pool,
 	}, nil
+}
+
+// TODO: нужен метод который идёт в бд и дёргает какие titles есть в бд-передаёт titles вот сюда func (c *Client) Get(ctx context.Context, titles []string) ([]entities.Coin, error) {
+
+// GetAllTitles метод извлекает все уникальные titles из бд
+func (s *Storage) GetAllTitles(ctx context.Context) ([]string, error) {
+	query := `SELECT DISTINCT title FROM coin_base`
+	rows, err := s.db.Query(ctx, query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute query: %w", err)
+	}
+	defer rows.Close()
+
+	var titles []string
+	for rows.Next() {
+		var title string
+		if err := rows.Scan(&title); err != nil {
+			return nil, fmt.Errorf("failed to scan row: %w", err)
+		}
+		titles = append(titles, title)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("row iteration error: %w", err)
+	}
+
+	return titles, nil
 }
 
 // Store метод сохраняет монеты в бд
