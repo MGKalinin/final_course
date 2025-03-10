@@ -12,8 +12,6 @@ type Service struct {
 	client  Client
 }
 
-//TODO: 2.нужен метод который вызывает метод бд который дёргает чего в бд-client get метод кладёт полученные монеты в store в бд
-
 // NewService конструктор - создает новый сервис
 func NewService(storage Storage, client Client) (*Service, error) {
 	if storage == nil {
@@ -23,6 +21,30 @@ func NewService(storage Storage, client Client) (*Service, error) {
 		return nil, errors.Wrap(entities.ErrorInvalidParams, "client is nil")
 	}
 	return &Service{storage: storage, client: client}, nil
+}
+
+//TODO: 2.нужен метод который вызывает метод бд который дёргает чего в бд-client get метод кладёт полученные монеты в store в бд
+
+// FetchAndStoreCoins метод вызывает метод бд для получения всех titles, затем использует клиент для получения данных о монетах и сохраняет их в бд
+func (s *Service) FetchAndStoreCoins(ctx context.Context) error {
+	// Получаем все titles из базы данных
+	titles, err := s.storage.GetAllTitles(ctx)
+	if err != nil {
+		return errors.Wrap(err, "failed to get titles from database")
+	}
+
+	// Получаем данные о монетах с помощью клиента
+	coins, err := s.client.Get(ctx, titles)
+	if err != nil {
+		return errors.Wrap(err, "failed to get coins from client")
+	}
+
+	// Сохраняем монеты в базе данных
+	if err := s.storage.Store(ctx, coins); err != nil {
+		return errors.Wrap(err, "failed to store coins in database")
+	}
+
+	return nil
 }
 
 type AggFunc int

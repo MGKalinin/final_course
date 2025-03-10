@@ -39,6 +39,11 @@ func main() {
 		log.Fatalf("Error creating service: %v", err)
 	}
 
+	// Вызываем метод для получения и сохранения данных о монетах
+	if err := service.FetchAndStoreCoins(ctx); err != nil {
+		log.Fatalf("Error fetching and storing coins: %v", err)
+	}
+
 	// Делаем запрос для получения информации о криптовалютах
 	coins, err := service.GetLastRates(ctx, coinsToFetch)
 	if err != nil {

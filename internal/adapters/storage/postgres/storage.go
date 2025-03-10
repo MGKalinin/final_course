@@ -26,7 +26,7 @@ func NewStorage(ctx context.Context, connString string) (*Storage, error) {
 	}, nil
 }
 
-// TODO: нужен метод который идёт в бд и дёргает какие titles есть в бд-передаёт titles вот сюда func (c *Client) Get(ctx context.Context, titles []string) ([]entities.Coin, error) {
+// TODO: 1.нужен метод который идёт в бд и дёргает какие titles есть в бд-передаёт titles вот сюда func (c *Client) Get(ctx context.Context, titles []string) ([]entities.Coin, error) {
 
 // GetAllTitles метод извлекает все уникальные titles из бд
 func (s *Storage) GetAllTitles(ctx context.Context) ([]string, error) {
