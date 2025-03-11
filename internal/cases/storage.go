@@ -9,5 +9,5 @@ import (
 type Storage interface {
 	Store(ctx context.Context, coins []entities.Coin) error
 	Get(ctx context.Context, titles []string, opts ...Option) ([]entities.Coin, error)
-	GetAllTitles(ctx context.Context) ([]string, error) //TODO: добавил метод GetAllTitles в Storage interface
+	GetAllTitles(ctx context.Context) ([]string, error) //TO DO: добавил метод GetAllTitles в Storage interface
 }
