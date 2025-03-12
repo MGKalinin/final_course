@@ -26,14 +26,12 @@ func NewStorage(ctx context.Context, connString string) (*Storage, error) {
 	}, nil
 }
 
-// TO DO: 1.нужен метод который идёт в бд и дёргает какие titles есть в бд-передаёт titles вот сюда func (c *Client) Get(ctx context.Context, titles []string) ([]entities.Coin, error) {
-
 // GetAllTitles метод извлекает все уникальные titles из бд
 func (s *Storage) GetAllTitles(ctx context.Context) ([]string, error) {
 	query := `SELECT DISTINCT title FROM coin_base`
 	rows, err := s.db.Query(ctx, query)
 	if err != nil {
-		return nil, fmt.Errorf("failed to execute query: %w", err) // TODO: формулировкк переделать врап типа не найдено
+		return nil, errors.Wrap(err, "query was not found")
 	}
 	defer rows.Close()
 

@@ -23,8 +23,6 @@ func NewService(storage Storage, client Client) (*Service, error) {
 	return &Service{storage: storage, client: client}, nil
 }
 
-//TO DO: 2.нужен метод который вызывает метод бд который дёргает чего в бд-client get метод кладёт полученные монеты в store в бд
-
 // FetchAndStoreCoins метод вызывает метод бд для получения всех titles, затем использует клиент для получения данных о монетах и сохраняет их в бд
 func (s *Service) FetchAndStoreCoins(ctx context.Context) error {
 	// Получаем все titles из базы данных
