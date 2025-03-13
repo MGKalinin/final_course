@@ -2,9 +2,9 @@ package apiserver
 
 import (
 	"encoding/json"
-	"net/http"
-
 	"final_course/internal/cases"
+	"final_course/internal/entities"
+	"net/http"
 )
 
 // RESTHandler - обработчик REST API
@@ -19,6 +19,7 @@ func NewRESTHandler(service cases.Service) *RESTHandler {
 	}
 }
 
+// getCoins обрабатывает запрос на получение последних курсов валют
 func (h *RESTHandler) getCoins(w http.ResponseWriter, r *http.Request) {
 	var req CoinsRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -38,7 +39,8 @@ func (h *RESTHandler) getCoins(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(dtoResult)
 }
 
-func convertToDTO(coins []cases.Coin) *CoinsResponse {
+// convertToDTO преобразует массив entities.Coin в DTO-формат
+func convertToDTO(coins []entities.Coin) *CoinsResponse {
 	dtoCoins := make([]CoinDTO, len(coins))
 	for i, coin := range coins {
 		dtoCoins[i] = CoinDTO{
