@@ -2,16 +2,15 @@ package api
 
 import (
 	"encoding/json"
-	"final_course/internal/cases"
 	"github.com/go-chi/chi/v5"
 	"net/http"
 )
 
 type APIHandler struct {
-	service *cases.Service
+	service ServiceInterface
 }
 
-func NewAPIHandler(service *cases.Service) *APIHandler {
+func NewAPIHandler(service ServiceInterface) *APIHandler {
 	return &APIHandler{service: service}
 }
 
