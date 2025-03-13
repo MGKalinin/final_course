@@ -2,14 +2,14 @@ package main
 
 import (
 	"context"
+	"final_course/internal/adapters/externalclient/cryptocompare"
+	"final_course/internal/adapters/storage/postgres"
+	"final_course/internal/cases"
+	"final_course/internal/port/api/handler"
 	"log"
 	"net/http"
 	"os"
 
-	"final_course/internal/adapters/externalclient/cryptocompare"
-	"final_course/internal/adapters/storage/postgres"
-	"final_course/internal/cases"
-	"final_course/internal/port/api"
 	"github.com/go-chi/chi/v5"
 )
 
@@ -31,7 +31,7 @@ func main() {
 	}
 
 	// Инициализация хранилища
-	storage, err := storage.NewStorage(ctx, os.Getenv("DATABASE_URL"))
+	storage, err := postgres.NewStorage(ctx, os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Fatalf("Error creating storage: %v", err)
 	}
@@ -43,16 +43,15 @@ func main() {
 	}
 
 	// Создание обработчика REST API
-	handler := api.NewAPIHandler(service)
+	h := handler.NewAPIHandler(service)
 
 	// Создание роутера
 	r := chi.NewRouter()
-
-	// Настройка маршрутов
-	handler.SetupRoutes(r)
+	h.SetupRoutes(r)
 
 	// Запуск сервера
 	addr := ":3000"
 	log.Printf("Сервер запущен на порту %s", addr)
 	log.Fatal(http.ListenAndServe(addr, r))
+
 }
