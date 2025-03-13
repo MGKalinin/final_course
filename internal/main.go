@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"github.com/go-chi/chi/v5"
 	"log"
 	"net/http"
 	"os"
@@ -10,7 +9,8 @@ import (
 	"final_course/internal/adapters/externalclient/cryptocompare"
 	"final_course/internal/adapters/storage/postgres"
 	"final_course/internal/cases"
-	"final_course/internal/port/apiserver"
+	"final_course/internal/port/api"
+	"github.com/go-chi/chi/v5"
 )
 
 // TODO: создать дир порт, в ней ещё дир(см как реализовается рест апи)-создать интерфейс для связи между портом(точка входа в программу, моё приложение) и самим сервисом-мне нужен будет роутер из пакета chi.mux-(методы, структура) -на этом урове не использовать сущности коин-нужно data transfer object-ошибки из пакета http(ok/bad reqvest)
@@ -43,7 +43,7 @@ func main() {
 	}
 
 	// Создание обработчика REST API
-	handler := apiserver.NewRESTHandler(service)
+	handler := api.NewAPIHandler(service)
 
 	// Создание роутера
 	r := chi.NewRouter()
