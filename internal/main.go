@@ -5,7 +5,7 @@ import (
 	"final_course/internal/adapters/externalclient/cryptocompare"
 	"final_course/internal/adapters/storage/postgres"
 	"final_course/internal/cases"
-	"final_course/internal/port/api/handler"
+	"final_course/internal/port/http/public"
 	"log"
 	"net/http"
 	"os"
@@ -43,7 +43,7 @@ func main() {
 	}
 
 	// Создание обработчика REST API
-	h := handler.NewAPIHandler(service)
+	h := public.NewAPIHandler(service)
 
 	// Создание роутера
 	r := chi.NewRouter()
