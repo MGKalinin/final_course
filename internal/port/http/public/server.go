@@ -7,6 +7,7 @@ import (
 	"final_course/internal/entities"
 	"final_course/pkg/dto"
 	"github.com/go-chi/chi/v5/middleware"
+	"log"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
@@ -29,7 +30,7 @@ type ServerInterface interface {
 	GetMin(ctx context.Context, titles []string) (dto.CoinDTOList, error)
 	GetAverage(ctx context.Context, titles []string) (dto.CoinDTOList, error)
 	GetLastRate(ctx context.Context, titles []string) (dto.CoinDTOList, error)
-	Start(addr string) error // Метод для запуска сервера
+	Run(addr string) error // Метод для запуска сервера
 }
 
 // NewServer конструктор для создания нового сервера.
@@ -81,14 +82,15 @@ func (s *Server) GetLastRate(ctx context.Context, titles []string) (dto.CoinDTOL
 	return dto.CoinDTOList{Coins: convertToCoinDTO(coins)}, nil
 }
 
-// Start запуск сервера.
+// Run запуск сервера.
 // Настраивает роутер и запускает HTTP-сервер на заданном адресе.
-func (s *Server) Start(addr string) error {
+func (s *Server) Run(addr string) error {
 	s.router.Use(middleware.Logger)            // Использует middleware для логирования запросов
 	s.router.Get("/max", s.handleGetMax)       // Регистрирует обработчик для получения максимального значения
 	s.router.Get("/min", s.handleGetMin)       // Регистрирует обработчик для получения минимального значения
 	s.router.Get("/avg", s.handleGetAverage)   // Регистрирует обработчик для получения среднего значения
 	s.router.Get("/last", s.handleGetLastRate) // Регистрирует обработчик для получения последнего значения
+	log.Printf("Сервер запущен на порту %s", addr)
 	return http.ListenAndServe(addr, s.router) // Запускает сервер
 }
 
