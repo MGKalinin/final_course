@@ -7,13 +7,10 @@ import (
 	"final_course/internal/cases"
 	"final_course/internal/port/http/public"
 	"log"
-	"net/http"
 	"os"
-
-	"github.com/go-chi/chi/v5"
 )
 
-// TODO: создать дир порт, в ней ещё дир(см как реализовается рест апи)-создать интерфейс для связи между портом(точка входа в программу, моё приложение) и самим сервисом-мне нужен будет роутер из пакета chi.mux-(методы, структура) -на этом урове не использовать сущности коин-нужно data transfer object-ошибки из пакета http(ok/bad reqvest)
+// TODO: ОБЩЕЕ: создать дир порт, в ней ещё дир(см как реализовается рест апи)-создать интерфейс для связи между портом(точка входа в программу, моё приложение) и самим сервисом-мне нужен будет роутер из пакета chi.mux-(методы, структура) -на этом уровне не использовать сущности коин-нужно data transfer object-ошибки из пакета http(ok/bad reqvest)
 func main() {
 	// Установка переменной окружения
 	os.Setenv("DATABASE_URL", "postgres://maksimkalinin:password@localhost:5432/postgres")
@@ -31,7 +28,7 @@ func main() {
 	}
 
 	// Инициализация хранилища
-	storage, err := postgres.NewStorage(ctx, os.Getenv("DATABASE_URL"))
+	storage, err := storage.NewStorage(ctx, os.Getenv("DATABASE_URL"))
 	if err != nil {
 		log.Fatalf("Error creating storage: %v", err)
 	}
@@ -42,16 +39,13 @@ func main() {
 		log.Fatalf("Error creating service: %v", err)
 	}
 
-	// Создание обработчика REST API
-	h := public.NewAPIHandler(service)
-
-	// Создание роутера
-	r := chi.NewRouter()
-	h.SetupRoutes(r)
+	// Создание сервера
+	server := public.NewServer(service)
 
 	// Запуск сервера
 	addr := ":3000"
 	log.Printf("Сервер запущен на порту %s", addr)
-	log.Fatal(http.ListenAndServe(addr, r))
-
+	if err := server.Start(addr); err != nil {
+		log.Fatalf("Error starting server: %v", err)
+	}
 }
