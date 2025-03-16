@@ -13,6 +13,4 @@ type CoinDTO struct {
 	Date  time.Time
 }
 
-type CoinDTOList struct {
-	Coins []CoinDTO
-}
+type CoinDTOList []CoinDTO

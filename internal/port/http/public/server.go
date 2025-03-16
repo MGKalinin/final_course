@@ -20,19 +20,21 @@ import (
 // Server структура реализующая интерфейс ServerInterface.
 // Содержит поля для сервиса и роутера.
 type Server struct {
-	service *cases.Service // Сервис для выполнения бизнес-логики
+	service *cases.Service // Сервис для выполнения бизнес-логики //TODO: здесь интерфейс Service
 	router  *chi.Mux       // Роутер для обработки HTTP-запросов
 }
 
 // ServerInterface описывает интерфейс методов получения результатов, запрашиваемых пользователем.
 // Включает методы для получения максимального, минимального, среднего значений и последнего курса.
-type ServerInterface interface {
+type ServerInterface interface { //TODO: здесь имплементация методов Service- это вынести в отдельный файл
 	GetMax(ctx context.Context, titles []string) (dto.CoinDTOList, error)
 	GetMin(ctx context.Context, titles []string) (dto.CoinDTOList, error)
 	GetAverage(ctx context.Context, titles []string) (dto.CoinDTOList, error)
 	GetLastRate(ctx context.Context, titles []string) (dto.CoinDTOList, error)
 	Run(addr string) error // Метод для запуска сервера
 }
+
+//TODO: любая функция /метод возвращают ошибку
 
 // NewServer конструктор для создания нового сервера.
 // Инициализирует сервер с заданным сервисом и роутером.
@@ -45,13 +47,13 @@ func NewServer(service *cases.Service) *Server {
 
 // GetMax реализация метода получения максимального значения.
 // Вызывает метод сервиса для получения максимального значения и конвертирует результат в CoinDTOList.
-func (s *Server) GetMax(ctx context.Context, titles []string) (dto.CoinDTOList, error) {
-	coins, err := s.service.GetMaxRate(ctx, titles)
-	if err != nil {
-		return dto.CoinDTOList{}, err
-	}
-	return dto.CoinDTOList{Coins: convertToCoinDTO(coins)}, nil
-}
+//func (s *Server) GetMax(ctx context.Context, titles []string) (dto.CoinDTOList, error) {
+//	coins, err := s.service.GetMaxRate(ctx, titles)
+//	if err != nil {
+//		return dto.CoinDTOList{}, err
+//	}
+//	return dto.CoinDTOList{Coins: convertToCoinDTO(coins)}, nil
+//}
 
 // GetMin реализация метода получения минимального значения.
 // Вызывает метод сервиса для получения минимального значения и конвертирует результат в CoinDTOList.
@@ -85,26 +87,29 @@ func (s *Server) GetLastRate(ctx context.Context, titles []string) (dto.CoinDTOL
 
 // Run запуск сервера.
 // Настраивает роутер и запускает HTTP-сервер на заданном адресе.
-func (s *Server) Run(addr string) error {
-	s.router.Use(middleware.Logger)            // Использует middleware для логирования запросов
-	s.router.Get("/max", s.handleGetMax)       // Регистрирует обработчик для получения максимального значения
-	s.router.Get("/min", s.handleGetMin)       // Регистрирует обработчик для получения минимального значения
-	s.router.Get("/avg", s.handleGetAverage)   // Регистрирует обработчик для получения среднего значения
-	s.router.Get("/last", s.handleGetLastRate) // Регистрирует обработчик для получения последнего значения
-	log.Printf("Сервер запущен на порту %s", addr)
-	return http.ListenAndServe(addr, s.router) // Запускает сервер
+func (s *Server) Run() error { //TODO: вверху- старт с запуска сервера
+	//s.router.Use(middleware.Logger)            // не нужен
+	s.router.Get("/v1/getmaxrate", s.handleGetMax) // Регистрирует обработчик для получения максимального значения
+	s.router.Get("/min", s.handleGetMin)           // Регистрирует обработчик для получения минимального значения
+	s.router.Get("/avg", s.handleGetAverage)       // Регистрирует обработчик для получения среднего значения
+	s.router.Get("/last", s.handleGetLastRate)     // Регистрирует обработчик для получения последнего значения
+	log.Printf("Сервер запущен на порту %s", ":8080")
+	return http.ListenAndServe(":8080", s.router) // Запускает сервер
 }
 
 // handleGetMax обработчик HTTP-запроса для получения максимального значения.
 // Извлекает параметры запроса, вызывает метод GetMax и возвращает результат в формате JSON.
-func (s *Server) handleGetMax(w http.ResponseWriter, r *http.Request) {
+// TODO: которые не handle методы удалить кроме Run
+func (s *Server) handleGetMax(rw http.ResponseWriter, req *http.Request) {
 	titles := r.URL.Query()["title"]
-	coins, err := s.GetMax(r.Context(), titles)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+	coins, err := s.GetMax(r.Context(), titles) //TODO: GetMax -это метод сервиса
+	if err != nil {                             //TODO: здесь ещё проверить coin на nil
+		http.Error(w, err.Error(), http.StatusInternalServerError) //TODO: здесь badrequest
+
 		return
 	}
-	w.Header().Set("Content-Type", "application/json")
+	//TODO: здесь слайс dto-после проверки на наличие значений
+	w.Header().Set("Content-Type", "application/json") //TODO: Header сначала добавить -потом обработать ошибку-потом write метод Header
 	json.NewEncoder(w).Encode(coins)
 }
 
@@ -146,19 +151,3 @@ func (s *Server) handleGetLastRate(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(coins)
 }
-
-// convertToCoinDTO конвертирует слайс объектов entities.Coin в слайс объектов dto.CoinDTO.
-// Используется для преобразования данных из внутреннего представления в формат, подходящий для передачи через API.
-func convertToCoinDTO(coins []entities.Coin) []dto.CoinDTO {
-	var coinDTOs []dto.CoinDTO
-	for _, coin := range coins {
-		coinDTOs = append(coinDTOs, dto.CoinDTO{
-			Title: coin.Title,
-			Rate:  coin.Rate,
-			Date:  coin.Date,
-		})
-	}
-	return coinDTOs
-}
-
-//TO DO: см как сервис связан с портом-всё тоже самое
