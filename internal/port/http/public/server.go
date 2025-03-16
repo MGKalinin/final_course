@@ -161,4 +161,4 @@ func convertToCoinDTO(coins []entities.Coin) []dto.CoinDTO {
 	return coinDTOs
 }
 
-//TODO: см как сервис связан с портом-всё тоже самое
+//TO DO: см как сервис связан с портом-всё тоже самое
