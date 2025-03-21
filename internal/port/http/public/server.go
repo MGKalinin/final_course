@@ -6,6 +6,7 @@ import (
 	"final_course/internal/cases"
 	"final_course/internal/entities"
 	"final_course/pkg/dto"
+	"github.com/pkg/errors"
 	"log"
 	"net/http"
 
