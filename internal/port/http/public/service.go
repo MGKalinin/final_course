@@ -1,13 +1,13 @@
-// Файл cases/service_interface.go
-package cases
+// Файл cases/service.go
+package public
 
 import (
 	"context"
 	"final_course/internal/entities"
 )
 
-// ServiceInterface определяет контракт бизнес-логики
-type ServiceInterface interface {
+// Service определяет контракт бизнес-логики
+type Service interface {
 	FetchAndStoreCoins(ctx context.Context) error
 	GetMaxRate(ctx context.Context, titles []string) ([]entities.Coin, error)
 	GetMinRate(ctx context.Context, titles []string) ([]entities.Coin, error)

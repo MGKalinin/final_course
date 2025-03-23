@@ -3,7 +3,6 @@ package public
 import (
 	"context"
 	"encoding/json"
-	"final_course/internal/cases"
 	"final_course/internal/entities"
 	"final_course/pkg/dto"
 	"github.com/pkg/errors"
@@ -16,28 +15,34 @@ import (
 // Server структура реализующая интерфейс ServerInterface.
 // Содержит поля для сервиса и роутера.
 type Server struct {
-	service cases.ServiceInterface // Используем интерфейс сервиса //TO DO: здесь интерфейс Service
-	router  *chi.Mux               // Роутер для обработки HTTP-запросов
+	service Service  // Используем интерфейс сервиса //TO DO: здесь интерфейс Service
+	router  *chi.Mux // Роутер для обработки HTTP-запросов
 }
 
 // NewServer конструктор
-func NewServer(service cases.ServiceInterface) *Server {
+func NewServer(service Service) (*Server, error) {
+	if service == nil || service == Service(nil) {
+		return nil, errors.Wrap(entities.ErrorInvalidParams, "service is nil")
+	}
+	r := chi.NewRouter()
 	return &Server{
 		service: service,
-		router:  chi.NewRouter(),
-	}
+		router:  r,
+	}, nil
 }
 
 // Run реализация метода  ServerInterface
-func (s *Server) Run(addr string) error {
+func (s *Server) Run() {
 	s.router.Get("/v1/max", s.handleGetMax)
 	s.router.Get("/v1/min", s.handleGetMin)
 	s.router.Get("/v1/avg", s.handleGetAverage)
 	s.router.Get("/v1/last", s.handleGetLastRate)
 
-	log.Printf("Server started on %s", addr)
-	return http.ListenAndServe(addr, s.router)
+	http.ListenAndServe(":8080", s.router)
+	log.Printf("Server started ")
 }
+
+//TODO: здесь 4 метода всё, -это методы Server-в каждый метод объединить всё что ниже расписано-метод в итоге отдаёт json; всё расписано-определить порядок
 
 // getMaxHandler реализация обработчиков с конвертацией в DTO
 func (s *Server) getMaxHandler(ctx context.Context, titles []string) (dto.CoinDTOList, error) {
@@ -46,8 +51,8 @@ func (s *Server) getMaxHandler(ctx context.Context, titles []string) (dto.CoinDT
 }
 
 // Обработчики запросов
-func (s *Server) handleGetMax(w http.ResponseWriter, r *http.Request) {
-	s.handleRequest(w, r, s.service.GetMaxRate)
+func (s *Server) handleGetMax(rw http.ResponseWriter, req *http.Request) { //TODO: сигнатура правильная
+	s.handleRequest(rw, req, s.service.GetMaxRate)
 }
 
 func (s *Server) handleGetMin(w http.ResponseWriter, r *http.Request) {

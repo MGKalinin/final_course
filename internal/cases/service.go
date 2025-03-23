@@ -3,11 +3,12 @@ package cases
 import (
 	"context"
 	"final_course/internal/entities"
+	"final_course/internal/port/http/public"
 	"github.com/pkg/errors"
 )
 
 // Добавляем проверку реализации интерфейса
-var _ ServiceInterface = (*Service)(nil)
+var _ public.Service = (*Service)(nil)
 
 // Service содержит логику работы сервиса
 type Service struct {
