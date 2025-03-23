@@ -1,7 +1,6 @@
 package public
 
 import (
-	"context"
 	"encoding/json"
 	"final_course/internal/entities"
 	"final_course/pkg/dto"
@@ -32,88 +31,64 @@ func NewServer(service Service) (*Server, error) {
 }
 
 // Run реализация метода  ServerInterface
-func (s *Server) Run() {
-	s.router.Get("/v1/max", s.handleGetMax)
-	s.router.Get("/v1/min", s.handleGetMin)
-	s.router.Get("/v1/avg", s.handleGetAverage)
-	s.router.Get("/v1/last", s.handleGetLastRate)
 
+func (s *Server) Run() {
+	s.router.Get("/v1/max", s.GetMax)
+	s.router.Get("/v1/min", s.GetMin)
+	s.router.Get("/v1/avg", s.GetAverage)
+	s.router.Get("/v1/last", s.GetLastRate)
+
+	log.Printf("Server starting on :8080")
 	http.ListenAndServe(":8080", s.router)
-	log.Printf("Server started ")
 }
 
 //TODO: здесь 4 метода всё, -это методы Server-в каждый метод объединить всё что ниже расписано-метод в итоге отдаёт json; всё расписано-определить порядок
 
 // getMaxHandler реализация обработчиков с конвертацией в DTO
-func (s *Server) getMaxHandler(ctx context.Context, titles []string) (dto.CoinDTOList, error) {
-	coins, err := s.service.GetMaxRate(ctx, titles)
-	return convertToDTO(coins), err
-}
+//func (s *Server) getMaxHandler(ctx context.Context, titles []string) (dto.CoinDTOList, error) {
+//	coins, err := s.service.GetMaxRate(ctx, titles)
+//	return convertToDTO(coins), err
+//}
 
-// Обработчики запросов
-func (s *Server) handleGetMax(rw http.ResponseWriter, req *http.Request) { //TODO: сигнатура правильная
-	s.handleRequest(rw, req, s.service.GetMaxRate)
-}
+//// Обработчики запросов
+//func (s *Server) handleGetMax(rw http.ResponseWriter, req *http.Request) { //TODO: сигнатура правильная
+//	s.handleRequest(rw, req, s.service.GetMaxRate)
+//}
 
-func (s *Server) handleGetMin(w http.ResponseWriter, r *http.Request) {
-	s.handleRequest(w, r, s.service.GetMinRate)
-}
-
-func (s *Server) handleGetAverage(w http.ResponseWriter, r *http.Request) {
-	s.handleRequest(w, r, s.service.GetAvgRate)
-}
-
-func (s *Server) handleGetLastRate(w http.ResponseWriter, r *http.Request) {
-	s.handleRequest(w, r, s.service.GetLastRates)
-}
-
-// Общий обработчик для всех запросов
-func (s *Server) handleRequest(
-	w http.ResponseWriter,
-	r *http.Request,
-	handler func(context.Context, []string) ([]entities.Coin, error),
-) {
-	titles := r.URL.Query()["title"]
+func (s *Server) GetMax(rw http.ResponseWriter, req *http.Request) {
+	titles := req.URL.Query()["title"]
 	if len(titles) == 0 {
-		http.Error(w, "missing 'title' parameter", http.StatusBadRequest)
+		rw.Header().Set("Content-Type", "application/json")
+		rw.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(rw).Encode(map[string]string{"error": "missing 'title' parameter"})
 		return
 	}
 
-	coins, err := handler(r.Context(), titles)
+	coins, err := s.service.GetMaxRate(req.Context(), titles)
 	if err != nil {
-		s.handleError(w, err)
+		var statusCode int
+		errorMessage := "internal server error"
+
+		if errors.Is(err, entities.ErrorInvalidParams) {
+			statusCode = http.StatusBadRequest
+			errorMessage = err.Error()
+		} else {
+			statusCode = http.StatusBadRequest // Изменено с StatusInternalServerError
+		}
+
+		rw.Header().Set("Content-Type", "application/json")
+		rw.WriteHeader(statusCode)
+		json.NewEncoder(rw).Encode(map[string]string{"error": errorMessage})
 		return
 	}
 
 	if len(coins) == 0 {
-		http.Error(w, "no data found", http.StatusNotFound)
+		rw.Header().Set("Content-Type", "application/json")
+		rw.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(rw).Encode(map[string]string{"error": "no data found"})
 		return
 	}
 
-	s.sendJSON(w, convertToDTO(coins), http.StatusOK)
-}
-
-// Обработка ошибок
-func (s *Server) handleError(w http.ResponseWriter, err error) {
-	switch {
-	case errors.Is(err, entities.ErrorInvalidParams):
-		http.Error(w, err.Error(), http.StatusBadRequest)
-	default:
-		http.Error(w, "internal server error", http.StatusBadRequest)
-	}
-}
-
-// Отправка JSON ответа
-func (s *Server) sendJSON(w http.ResponseWriter, data interface{}, statusCode int) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(statusCode)
-	if err := json.NewEncoder(w).Encode(data); err != nil {
-		log.Printf("Failed to encode response: %v", err)
-	}
-}
-
-// Конвертация в DTO
-func convertToDTO(coins []entities.Coin) dto.CoinDTOList {
 	result := make(dto.CoinDTOList, len(coins))
 	for i, coin := range coins {
 		result[i] = dto.CoinDTO{
@@ -122,5 +97,160 @@ func convertToDTO(coins []entities.Coin) dto.CoinDTOList {
 			Date:  coin.Date,
 		}
 	}
-	return result
+
+	rw.Header().Set("Content-Type", "application/json")
+	rw.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(rw).Encode(result); err != nil {
+		log.Printf("Failed to encode response: %v", err)
+	}
+}
+
+func (s *Server) GetMin(rw http.ResponseWriter, req *http.Request) {
+	titles := req.URL.Query()["title"]
+	if len(titles) == 0 {
+		rw.Header().Set("Content-Type", "application/json")
+		rw.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(rw).Encode(map[string]string{"error": "missing 'title' parameter"})
+		return
+	}
+
+	coins, err := s.service.GetMinRate(req.Context(), titles)
+	if err != nil {
+		var statusCode int
+		errorMessage := "internal server error"
+
+		if errors.Is(err, entities.ErrorInvalidParams) {
+			statusCode = http.StatusBadRequest
+			errorMessage = err.Error()
+		} else {
+			statusCode = http.StatusBadRequest // Изменено
+		}
+
+		rw.Header().Set("Content-Type", "application/json")
+		rw.WriteHeader(statusCode)
+		json.NewEncoder(rw).Encode(map[string]string{"error": errorMessage})
+		return
+	}
+
+	if len(coins) == 0 {
+		rw.Header().Set("Content-Type", "application/json")
+		rw.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(rw).Encode(map[string]string{"error": "no data found"})
+		return
+	}
+
+	result := make(dto.CoinDTOList, len(coins))
+	for i, coin := range coins {
+		result[i] = dto.CoinDTO{
+			Title: coin.Title,
+			Rate:  coin.Rate,
+			Date:  coin.Date,
+		}
+	}
+
+	rw.Header().Set("Content-Type", "application/json")
+	rw.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(rw).Encode(result); err != nil {
+		log.Printf("Failed to encode response: %v", err)
+	}
+}
+
+func (s *Server) GetAverage(rw http.ResponseWriter, req *http.Request) {
+	titles := req.URL.Query()["title"]
+	if len(titles) == 0 {
+		rw.Header().Set("Content-Type", "application/json")
+		rw.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(rw).Encode(map[string]string{"error": "missing 'title' parameter"})
+		return
+	}
+
+	coins, err := s.service.GetAvgRate(req.Context(), titles)
+	if err != nil {
+		var statusCode int
+		errorMessage := "internal server error"
+
+		if errors.Is(err, entities.ErrorInvalidParams) {
+			statusCode = http.StatusBadRequest
+			errorMessage = err.Error()
+		} else {
+			statusCode = http.StatusBadRequest // Изменено
+		}
+
+		rw.Header().Set("Content-Type", "application/json")
+		rw.WriteHeader(statusCode)
+		json.NewEncoder(rw).Encode(map[string]string{"error": errorMessage})
+		return
+	}
+
+	if len(coins) == 0 {
+		rw.Header().Set("Content-Type", "application/json")
+		rw.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(rw).Encode(map[string]string{"error": "no data found"})
+		return
+	}
+
+	result := make(dto.CoinDTOList, len(coins))
+	for i, coin := range coins {
+		result[i] = dto.CoinDTO{
+			Title: coin.Title,
+			Rate:  coin.Rate,
+			Date:  coin.Date,
+		}
+	}
+
+	rw.Header().Set("Content-Type", "application/json")
+	rw.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(rw).Encode(result); err != nil {
+		log.Printf("Failed to encode response: %v", err)
+	}
+}
+
+func (s *Server) GetLastRate(rw http.ResponseWriter, req *http.Request) {
+	titles := req.URL.Query()["title"]
+	if len(titles) == 0 {
+		rw.Header().Set("Content-Type", "application/json")
+		rw.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(rw).Encode(map[string]string{"error": "missing 'title' parameter"})
+		return
+	}
+
+	coins, err := s.service.GetLastRates(req.Context(), titles)
+	if err != nil {
+		var statusCode int
+		errorMessage := "internal server error"
+
+		if errors.Is(err, entities.ErrorInvalidParams) {
+			statusCode = http.StatusBadRequest
+			errorMessage = err.Error()
+		} else {
+			statusCode = http.StatusBadRequest // Изменено
+		}
+
+		rw.Header().Set("Content-Type", "application/json")
+		rw.WriteHeader(statusCode)
+		json.NewEncoder(rw).Encode(map[string]string{"error": errorMessage})
+		return
+	}
+
+	if len(coins) == 0 {
+		rw.Header().Set("Content-Type", "application/json")
+		rw.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(rw).Encode(map[string]string{"error": "no data found"})
+		return
+	}
+
+	result := make(dto.CoinDTOList, len(coins))
+	for i, coin := range coins {
+		result[i] = dto.CoinDTO{
+			Title: coin.Title,
+			Rate:  coin.Rate,
+			Date:  coin.Date,
+		}
+	}
+
+	rw.Header().Set("Content-Type", "application/json")
+	rw.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(rw).Encode(result); err != nil {
+		log.Printf("Failed to encode response: %v", err)
+	}
 }
