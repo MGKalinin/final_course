@@ -55,16 +55,20 @@ func (s *Server) Run() {
 //	s.handleRequest(rw, req, s.service.GetMaxRate)
 //}
 
+//TODO: rest api
+
 func (s *Server) GetMax(rw http.ResponseWriter, req *http.Request) {
+	//TODO: все ошибки через http.Erorr и return
 	titles := req.URL.Query()["title"]
 	if len(titles) == 0 {
 		rw.Header().Set("Content-Type", "application/json")
 		rw.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(rw).Encode(map[string]string{"error": "missing 'title' parameter"})
+		//json.NewEncoder(rw).Encode(map[string]string{"error": "missing 'title' parameter"})
 		return
 	}
 
-	coins, err := s.service.GetMaxRate(req.Context(), titles)
+	ctx := req.Context()
+	coins, err := s.service.GetMaxRate(ctx, titles) //TODO:ctx:=req.Context() прописать в других методах
 	if err != nil {
 		var statusCode int
 		errorMessage := "internal server error"
@@ -77,8 +81,8 @@ func (s *Server) GetMax(rw http.ResponseWriter, req *http.Request) {
 		}
 
 		rw.Header().Set("Content-Type", "application/json")
-		rw.WriteHeader(statusCode)
-		json.NewEncoder(rw).Encode(map[string]string{"error": errorMessage})
+		//rw.WriteHeader(statusCode)
+		//json.NewEncoder(rw).Encode(map[string]string{"error": errorMessage})
 		return
 	}
 
@@ -98,157 +102,7 @@ func (s *Server) GetMax(rw http.ResponseWriter, req *http.Request) {
 		}
 	}
 
-	rw.Header().Set("Content-Type", "application/json")
-	rw.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(rw).Encode(result); err != nil {
-		log.Printf("Failed to encode response: %v", err)
-	}
-}
-
-func (s *Server) GetMin(rw http.ResponseWriter, req *http.Request) {
-	titles := req.URL.Query()["title"]
-	if len(titles) == 0 {
-		rw.Header().Set("Content-Type", "application/json")
-		rw.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(rw).Encode(map[string]string{"error": "missing 'title' parameter"})
-		return
-	}
-
-	coins, err := s.service.GetMinRate(req.Context(), titles)
-	if err != nil {
-		var statusCode int
-		errorMessage := "internal server error"
-
-		if errors.Is(err, entities.ErrorInvalidParams) {
-			statusCode = http.StatusBadRequest
-			errorMessage = err.Error()
-		} else {
-			statusCode = http.StatusBadRequest // Изменено
-		}
-
-		rw.Header().Set("Content-Type", "application/json")
-		rw.WriteHeader(statusCode)
-		json.NewEncoder(rw).Encode(map[string]string{"error": errorMessage})
-		return
-	}
-
-	if len(coins) == 0 {
-		rw.Header().Set("Content-Type", "application/json")
-		rw.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(rw).Encode(map[string]string{"error": "no data found"})
-		return
-	}
-
-	result := make(dto.CoinDTOList, len(coins))
-	for i, coin := range coins {
-		result[i] = dto.CoinDTO{
-			Title: coin.Title,
-			Rate:  coin.Rate,
-			Date:  coin.Date,
-		}
-	}
-
-	rw.Header().Set("Content-Type", "application/json")
-	rw.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(rw).Encode(result); err != nil {
-		log.Printf("Failed to encode response: %v", err)
-	}
-}
-
-func (s *Server) GetAverage(rw http.ResponseWriter, req *http.Request) {
-	titles := req.URL.Query()["title"]
-	if len(titles) == 0 {
-		rw.Header().Set("Content-Type", "application/json")
-		rw.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(rw).Encode(map[string]string{"error": "missing 'title' parameter"})
-		return
-	}
-
-	coins, err := s.service.GetAvgRate(req.Context(), titles)
-	if err != nil {
-		var statusCode int
-		errorMessage := "internal server error"
-
-		if errors.Is(err, entities.ErrorInvalidParams) {
-			statusCode = http.StatusBadRequest
-			errorMessage = err.Error()
-		} else {
-			statusCode = http.StatusBadRequest // Изменено
-		}
-
-		rw.Header().Set("Content-Type", "application/json")
-		rw.WriteHeader(statusCode)
-		json.NewEncoder(rw).Encode(map[string]string{"error": errorMessage})
-		return
-	}
-
-	if len(coins) == 0 {
-		rw.Header().Set("Content-Type", "application/json")
-		rw.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(rw).Encode(map[string]string{"error": "no data found"})
-		return
-	}
-
-	result := make(dto.CoinDTOList, len(coins))
-	for i, coin := range coins {
-		result[i] = dto.CoinDTO{
-			Title: coin.Title,
-			Rate:  coin.Rate,
-			Date:  coin.Date,
-		}
-	}
-
-	rw.Header().Set("Content-Type", "application/json")
-	rw.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(rw).Encode(result); err != nil {
-		log.Printf("Failed to encode response: %v", err)
-	}
-}
-
-func (s *Server) GetLastRate(rw http.ResponseWriter, req *http.Request) {
-	titles := req.URL.Query()["title"]
-	if len(titles) == 0 {
-		rw.Header().Set("Content-Type", "application/json")
-		rw.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(rw).Encode(map[string]string{"error": "missing 'title' parameter"})
-		return
-	}
-
-	coins, err := s.service.GetLastRates(req.Context(), titles)
-	if err != nil {
-		var statusCode int
-		errorMessage := "internal server error"
-
-		if errors.Is(err, entities.ErrorInvalidParams) {
-			statusCode = http.StatusBadRequest
-			errorMessage = err.Error()
-		} else {
-			statusCode = http.StatusBadRequest // Изменено
-		}
-
-		rw.Header().Set("Content-Type", "application/json")
-		rw.WriteHeader(statusCode)
-		json.NewEncoder(rw).Encode(map[string]string{"error": errorMessage})
-		return
-	}
-
-	if len(coins) == 0 {
-		rw.Header().Set("Content-Type", "application/json")
-		rw.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(rw).Encode(map[string]string{"error": "no data found"})
-		return
-	}
-
-	result := make(dto.CoinDTOList, len(coins))
-	for i, coin := range coins {
-		result[i] = dto.CoinDTO{
-			Title: coin.Title,
-			Rate:  coin.Rate,
-			Date:  coin.Date,
-		}
-	}
-
-	rw.Header().Set("Content-Type", "application/json")
+	rw.Header().Set("Content-Type", "application/json") //TODO: вместо Set Add
 	rw.WriteHeader(http.StatusOK)
 	if err := json.NewEncoder(rw).Encode(result); err != nil {
 		log.Printf("Failed to encode response: %v", err)
