@@ -90,7 +90,8 @@ func (s *Server) GetMax(rw http.ResponseWriter, req *http.Request) {
 	}
 
 	// Устанавливаем заголовок Content-Type для JSON-ответа
-	rw.Header().Set("Content-Type", "application/json")
+	//rw.Header().Set("Content-Type", "application/json")
+	rw.Header().Add("Content-Type", "application/json")
 
 	// Кодируем и отправляем список монет в формате JSON
 	// Предполагается, что entities.Coin имеет те же поля, что и dto.CoinDT,
@@ -99,4 +100,3 @@ func (s *Server) GetMax(rw http.ResponseWriter, req *http.Request) {
 }
 
 //-----------------------------------------------------------------------------
-//rw.Header().Set("Content-Type", "application/json") //TODO: вместо Set Add
