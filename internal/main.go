@@ -37,6 +37,11 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error creating service: %v", err)
 	}
+	//
+	//// Добавляем запрос курсов при старте
+	//if err := service.FetchAndStoreCoins(context.Background()); err != nil {
+	//	log.Fatalf("Failed to fetch and store coins: %v", err)
+	//}
 
 	//Инициализация сервера
 	server, err := public.NewServer(service)

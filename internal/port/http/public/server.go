@@ -3,6 +3,7 @@ package public
 import (
 	"encoding/json"
 	"final_course/internal/entities"
+	"final_course/pkg/dto"
 	"github.com/pkg/errors"
 	"log"
 	"net/http"
@@ -33,9 +34,9 @@ func NewServer(service Service) (*Server, error) {
 // Run реализация метода  ServerInterface
 func (s *Server) Run() {
 	s.router.Get("/v1/max", s.GetMax)
-	//s.router.Get("/v1/min", s.GetMin)
-	//s.router.Get("/v1/avg", s.GetAverage)
-	//s.router.Get("/v1/last", s.GetLastRate)
+	s.router.Get("/v1/min", s.GetMin)
+	s.router.Get("/v1/avg", s.GetAverage)
+	s.router.Get("/v1/last", s.GetLastRate)
 
 	log.Printf("Server starting on :8080")
 	http.ListenAndServe(":8080", s.router)
@@ -89,14 +90,154 @@ func (s *Server) GetMax(rw http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// Устанавливаем заголовок Content-Type для JSON-ответа
-	//rw.Header().Set("Content-Type", "application/json")
-	rw.Header().Add("Content-Type", "application/json")
+	// Преобразуем в CoinDTOList для JSON
+	var dtoList dto.CoinDTOList
+	for _, coin := range response {
+		dtoList = append(dtoList, dto.CoinDTO{
+			Title: coin.Title,
+			Rate:  coin.Rate,
+			Date:  coin.Date,
+		})
+	}
 
-	// Кодируем и отправляем список монет в формате JSON
-	// Предполагается, что entities.Coin имеет те же поля, что и dto.CoinDT,
-	// поэтому прямое кодирование возможно
-	json.NewEncoder(rw).Encode(response)
+	// Устанавливаем заголовок и кодируем ответ
+	rw.Header().Add("Content-Type", "application/json")
+	json.NewEncoder(rw).Encode(dtoList)
 }
 
-//-----------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
+
+func (s *Server) GetMin(rw http.ResponseWriter, req *http.Request) {
+	// Извлекаем и валидируем параметр titles
+	titlesStr := req.URL.Query().Get("titles")
+	if titlesStr == "" {
+		http.Error(rw, "missing 'titles' parameter", http.StatusBadRequest)
+		return
+	}
+	titles := strings.Split(titlesStr, ",")
+	var validTitles []string
+	for _, title := range titles {
+		trimmed := strings.TrimSpace(title)
+		if trimmed != "" {
+			validTitles = append(validTitles, trimmed)
+		}
+	}
+	if len(validTitles) == 0 {
+		http.Error(rw, "No valid titles provided.", http.StatusBadRequest)
+		return
+	}
+
+	// Вызываем сервис для получения минимальных ставок
+	ctx := req.Context()
+	response, err := s.service.GetMinRate(ctx, validTitles)
+	if err != nil {
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Преобразуем в CoinDTOList для JSON
+	var dtoList dto.CoinDTOList
+	for _, coin := range response {
+		dtoList = append(dtoList, dto.CoinDTO{
+			Title: coin.Title,
+			Rate:  coin.Rate,
+			Date:  coin.Date,
+		})
+	}
+
+	// Устанавливаем заголовок и кодируем ответ
+	rw.Header().Add("Content-Type", "application/json")
+	json.NewEncoder(rw).Encode(dtoList)
+}
+
+// -----------------------------------------------------------------------------
+
+func (s *Server) GetAverage(rw http.ResponseWriter, req *http.Request) {
+	// Извлекаем и валидируем параметр titles
+	titlesStr := req.URL.Query().Get("titles")
+	if titlesStr == "" {
+		http.Error(rw, "missing 'titles' parameter", http.StatusBadRequest)
+		return
+	}
+	titles := strings.Split(titlesStr, ",")
+	var validTitles []string
+	for _, title := range titles {
+		trimmed := strings.TrimSpace(title)
+		if trimmed != "" {
+			validTitles = append(validTitles, trimmed)
+		}
+	}
+	if len(validTitles) == 0 {
+		http.Error(rw, "No valid titles provided.", http.StatusBadRequest)
+		return
+	}
+
+	// Вызываем сервис для получения средних ставок
+	ctx := req.Context()
+	response, err := s.service.GetAvgRate(ctx, validTitles)
+	if err != nil {
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Преобразуем в CoinDTOList для JSON
+	var dtoList dto.CoinDTOList
+	for _, coin := range response {
+		dtoList = append(dtoList, dto.CoinDTO{
+			Title: coin.Title,
+			Rate:  coin.Rate,
+			Date:  coin.Date,
+		})
+	}
+
+	// Устанавливаем заголовок и кодируем ответ
+	rw.Header().Add("Content-Type", "application/json")
+	json.NewEncoder(rw).Encode(dtoList)
+}
+
+// -----------------------------------------------------------------------------
+
+func (s *Server) GetLastRate(rw http.ResponseWriter, req *http.Request) {
+	// Извлекаем и валидируем параметр titles
+	titlesStr := req.URL.Query().Get("titles")
+	if titlesStr == "" {
+		http.Error(rw, "missing 'titles' parameter", http.StatusBadRequest)
+		return
+	}
+	titles := strings.Split(titlesStr, ",")
+	var validTitles []string
+	for _, title := range titles {
+		trimmed := strings.TrimSpace(title)
+		if trimmed != "" {
+			validTitles = append(validTitles, trimmed)
+		}
+	}
+	if len(validTitles) == 0 {
+		http.Error(rw, "No valid titles provided.", http.StatusBadRequest)
+		return
+	}
+
+	// Вызываем сервис для получения последних ставок
+	ctx := req.Context()
+	response, err := s.service.GetLastRates(ctx, validTitles)
+	if err != nil {
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Преобразуем в CoinDTOList для JSON
+	var dtoList dto.CoinDTOList
+	for _, coin := range response {
+		dtoList = append(dtoList, dto.CoinDTO{
+			Title: coin.Title,
+			Rate:  coin.Rate,
+			Date:  coin.Date,
+		})
+	}
+
+	// Устанавливаем заголовок и кодируем ответ
+	rw.Header().Add("Content-Type", "application/json")
+	json.NewEncoder(rw).Encode(dtoList)
+}
+
+// -----------------------------------------------------------------------------
