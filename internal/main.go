@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	_ "final_course/docs"
 	"final_course/internal/adapters/externalclient/cryptocompare"
 	"final_course/internal/adapters/storage/postgres"
 	"final_course/internal/cases"
