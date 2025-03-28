@@ -42,13 +42,13 @@ func (s *Server) Run() {
 	http.ListenAndServe(":8080", s.router)
 }
 
-//TODO: здесь 4 метода всё, -это методы Server-в каждый метод объединить всё что ниже расписано-
+//TO DO: здесь 4 метода всё, -это методы Server-в каждый метод объединить всё что ниже расписано-
 // метод в итоге отдаёт json; всё расписано-определить порядок
 
 //-----------------------------------------------------------------------------
 //ctx := req.Context()
-//coins, err := s.service.GetMaxRate(ctx, titles) //TODO:ctx:=req.Context() прописать в других методах
-//TODO: все ошибки через http.Erorr и return
+//coins, err := s.service.GetMaxRate(ctx, titles) //TO DO:ctx:=req.Context() прописать в других методах
+//TO DO: все ошибки через http.Erorr и return
 
 // GetMax обрабатывает GET-запросы к эндпоинту /v1/max, возвращая максимальные ставки для указанных монет.
 func (s *Server) GetMax(rw http.ResponseWriter, req *http.Request) {
@@ -63,47 +63,44 @@ func (s *Server) GetMax(rw http.ResponseWriter, req *http.Request) {
 
 	// Разделяем строку titles на список и обрезаем пробелы
 	// Например, "bitcoin, ethereum" преобразуется в ["bitcoin", "ethereum"]
-	titles := strings.Split(titlesStr, ",")
-	var validTitles []string
-	for _, title := range titles {
-		trimmed := strings.TrimSpace(title)
-		if trimmed != "" {
-			validTitles = append(validTitles, trimmed)
-		}
-	}
-
-	// Проверяем, остались ли валидные названия после обработки
-	// Если нет, возвращаем ошибку 400 (Bad Request)
-	if len(validTitles) == 0 {
-		http.Error(rw, "No valid titles provided.", http.StatusBadRequest)
-		return
-	}
+	titles := strings.Split(titlesStr, ",") // это и так слайс строк
 
 	// Вызываем сервис для получения максимальных ставок для указанных монет
 	// Сервис возвращает список entities.Coin с максимальными ставками
 	ctx := req.Context()
-	response, err := s.service.GetMaxRate(ctx, validTitles)
+	coins, err := s.service.GetMaxRate(ctx, titles)
 	if err != nil {
 		// Если произошла ошибка в сервисе, возвращаем ошибку 500 (Internal Server Error)
 		// Сообщение об ошибке передается клиенту
-		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		http.Error(rw, err.Error(), http.StatusBadRequest)
+		return
+	}
+	if coins == nil {
+		http.Error(rw, err.Error(), http.StatusNotFound)
 		return
 	}
 
 	// Преобразуем в CoinDTOList для JSON
 	var dtoList dto.CoinDTOList
-	for _, coin := range response {
+	for _, coin := range coins {
 		dtoList = append(dtoList, dto.CoinDTO{
 			Title: coin.Title,
 			Rate:  coin.Rate,
-			Date:  coin.Date,
+			Date:  coin.Date, // TODO: может быть ебота со временем -см на тестах
 		})
 	}
 
 	// Устанавливаем заголовок и кодируем ответ
 	rw.Header().Add("Content-Type", "application/json")
-	json.NewEncoder(rw).Encode(dtoList)
+	err = json.NewEncoder(rw).Encode(dtoList)
+	if err != nil {
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	rw.WriteHeader(http.StatusOK)
 }
+
+//TODO: доделать остальные три метода; документация swagger; конфиг; миграция бд;
 
 // -----------------------------------------------------------------------------
 
