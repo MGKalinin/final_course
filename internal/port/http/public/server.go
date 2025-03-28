@@ -41,7 +41,19 @@ func (s *Server) Run() {
 	http.ListenAndServe(":8080", s.router)
 }
 
-// GetMax обрабатывает GET-запросы к эндпоинту /v1/max, возвращая максимальные ставки для указанных монет.
+//Аннотации для эндпоинтов
+
+// GetMax godoc
+// @Summary Получить максимальные курсы
+// @Description Возвращает максимальные значения курсов для указанных криптовалют
+// @Tags Rates
+// @Accept  json
+// @Produce  json
+// @Param titles query string true "Список валют через запятую (пример: BTC,ETH)"
+// @Success 200 {object} dto.CoinDTOList
+// @Failure 400 {object} entities.ErrorResponse
+// @Failure 404 {object} entities.ErrorResponse
+// @Router /max [get]
 func (s *Server) GetMax(rw http.ResponseWriter, req *http.Request) {
 	// Извлекаем параметр titles из строки запроса
 	titlesStr := req.URL.Query().Get("titles")
@@ -87,7 +99,17 @@ func (s *Server) GetMax(rw http.ResponseWriter, req *http.Request) {
 //TODO:  документация swagger; конфиг; миграция бд;
 //доделать остальные три метода
 
-// GetMin обрабатывает GET-запросы к эндпоинту /v1/min
+// GetMin godoc
+// @Summary Получить минимальные курсы
+// @Description Возвращает минимальные значения курсов для указанных криптовалют
+// @Tags Rates
+// @Accept  json
+// @Produce  json
+// @Param titles query string true "Список валют через запятую (пример: BTC,ETH)"
+// @Success 200 {object} dto.CoinDTOList
+// @Failure 400 {object} entities.ErrorResponse
+// @Failure 404 {object} entities.ErrorResponse
+// @Router /min [get]
 func (s *Server) GetMin(rw http.ResponseWriter, req *http.Request) {
 	titlesStr := req.URL.Query().Get("titles")
 	if titlesStr == "" {
@@ -122,7 +144,17 @@ func (s *Server) GetMin(rw http.ResponseWriter, req *http.Request) {
 	rw.WriteHeader(http.StatusOK)
 }
 
-// GetAverage обрабатывает GET-запросы к эндпоинту /v1/avg
+// GetAverage godoc
+// @Summary Получить средние курсы
+// @Description Возвращает средние значения курсов для указанных криптовалют
+// @Tags Rates
+// @Accept  json
+// @Produce  json
+// @Param titles query string true "Список валют через запятую (пример: BTC,ETH)"
+// @Success 200 {object} dto.CoinDTOList
+// @Failure 400 {object} entities.ErrorResponse
+// @Failure 404 {object} entities.ErrorResponse
+// @Router /avg [get]
 func (s *Server) GetAverage(rw http.ResponseWriter, req *http.Request) {
 	titlesStr := req.URL.Query().Get("titles")
 	if titlesStr == "" {
@@ -157,7 +189,17 @@ func (s *Server) GetAverage(rw http.ResponseWriter, req *http.Request) {
 	rw.WriteHeader(http.StatusOK)
 }
 
-// GetLastRate обрабатывает GET-запросы к эндпоинту /v1/last
+// GetLastRate godoc
+// @Summary Получить последние курсы
+// @Description Возвращает последние зарегистрированные значения курсов
+// @Tags Rates
+// @Accept  json
+// @Produce  json
+// @Param titles query string true "Список валют через запятую (пример: BTC,ETH)"
+// @Success 200 {object} dto.CoinDTOList
+// @Failure 400 {object} entities.ErrorResponse
+// @Failure 404 {object} entities.ErrorResponse
+// @Router /last [get]
 func (s *Server) GetLastRate(rw http.ResponseWriter, req *http.Request) {
 	titlesStr := req.URL.Query().Get("titles")
 	if titlesStr == "" {

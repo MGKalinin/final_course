@@ -2,15 +2,24 @@ package dto
 
 import "time"
 
-//type CoinDTO struct {
-//Symbol string `json:"symbol"` //TO DO поля как у монет -здесь должен быть слайс структур coinsdto
-//Price  float64 `json:"price"`
-//}
+// DTO аннотации
 
+// CoinDTO транспортная модель для Coin
+// @Schema
 type CoinDTO struct {
+	// Название криптовалюты
+	// @example BTC
 	Title string
-	Rate  float64
-	Date  time.Time
+
+	// Текущий курс
+	// @example 50000.0
+	Rate float64
+
+	// Дата обновления
+	// @example 2023-10-01T12:00:00Z
+	Date time.Time
 }
 
+// CoinDTOList список CoinDTO
+// @Schema
 type CoinDTOList []CoinDTO

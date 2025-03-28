@@ -10,6 +10,17 @@ import (
 	"os"
 )
 
+// Общее описание API
+
+// @title Crypto Currency API
+// @version 1.0
+// @description API для получения курсов криптовалют
+
+// @contact.name Максим Калинин
+// @contact.email ваш@email.com
+
+// @host localhost:8080
+// @BasePath /v1
 func main() {
 	// Установка переменной окружения
 	os.Setenv("DATABASE_URL", "postgres://maksimkalinin:password@localhost:5432/postgres")
@@ -37,11 +48,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error creating service: %v", err)
 	}
-	//
-	//// Добавляем запрос курсов при старте
-	//if err := service.FetchAndStoreCoins(context.Background()); err != nil {
-	//	log.Fatalf("Failed to fetch and store coins: %v", err)
-	//}
 
 	//Инициализация сервера
 	server, err := public.NewServer(service)

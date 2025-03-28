@@ -5,15 +5,22 @@ import (
 	"time"
 )
 
-// Coin представляет информацию о криптовалюте
-// Title - название криптовалюты
-// Rate - текущий курс
-// Date - дата обновления
+//  Аннотации моделей
 
+// Coin информация о криптовалюте
+// @Schema
 type Coin struct {
+	// Название криптовалюты
+	// @example BTC
 	Title string
-	Rate  float64
-	Date  time.Time
+
+	// Текущий курс
+	// @example 50000.0
+	Rate float64
+
+	// Дата обновления
+	// @example 2023-10-01T12:00:00Z
+	Date time.Time
 }
 
 // конструктор
