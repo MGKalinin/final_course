@@ -2,7 +2,7 @@ package entities
 
 import "github.com/pkg/errors"
 
-// создать переменную ошибки- и далее использовать её в обёртке во всех случаях,
-// добавляя соответсвующий комментарий
-
+// ErrorInvalidParams общая ошибка для невалидных параметров
+// @Description Возникает при некорректных входных данных
+// @Example "invalid params: example error message"
 var ErrorInvalidParams = errors.New("invalid params:")

@@ -9,7 +9,9 @@ import (
 	"net/http"
 	"strings"
 
+	_ "final_course/docs"
 	"github.com/go-chi/chi/v5"
+	"github.com/swaggo/http-swagger"
 )
 
 // Server структура реализующая интерфейс ServerInterface.
@@ -24,6 +26,7 @@ func NewServer(service Service) (*Server, error) {
 		return nil, errors.Wrap(entities.ErrorInvalidParams, "service is nil")
 	}
 	r := chi.NewRouter()
+	r.Get("/swagger/*", httpSwagger.WrapHandler)
 	return &Server{
 		service: service,
 		router:  r,
@@ -51,8 +54,8 @@ func (s *Server) Run() {
 // @Produce  json
 // @Param titles query string true "Список валют через запятую (пример: BTC,ETH)"
 // @Success 200 {object} dto.CoinDTOList
-// @Failure 400 {object} entities.ErrorResponse
-// @Failure 404 {object} entities.ErrorResponse
+// @Failure 400 {string} string "Пример: invalid params: maximum value is missing"
+// @Failure 404 {string} string "Пример: данные не найдены"
 // @Router /max [get]
 func (s *Server) GetMax(rw http.ResponseWriter, req *http.Request) {
 	// Извлекаем параметр titles из строки запроса
@@ -107,8 +110,8 @@ func (s *Server) GetMax(rw http.ResponseWriter, req *http.Request) {
 // @Produce  json
 // @Param titles query string true "Список валют через запятую (пример: BTC,ETH)"
 // @Success 200 {object} dto.CoinDTOList
-// @Failure 400 {object} entities.ErrorResponse
-// @Failure 404 {object} entities.ErrorResponse
+// @Failure 400 {string} string "Пример: invalid params: maximum value is missing"
+// @Failure 404 {string} string "Пример: данные не найдены"
 // @Router /min [get]
 func (s *Server) GetMin(rw http.ResponseWriter, req *http.Request) {
 	titlesStr := req.URL.Query().Get("titles")
@@ -152,8 +155,8 @@ func (s *Server) GetMin(rw http.ResponseWriter, req *http.Request) {
 // @Produce  json
 // @Param titles query string true "Список валют через запятую (пример: BTC,ETH)"
 // @Success 200 {object} dto.CoinDTOList
-// @Failure 400 {object} entities.ErrorResponse
-// @Failure 404 {object} entities.ErrorResponse
+// @Failure 400 {string} string "Пример: invalid params: maximum value is missing"
+// @Failure 404 {string} string "Пример: данные не найдены"
 // @Router /avg [get]
 func (s *Server) GetAverage(rw http.ResponseWriter, req *http.Request) {
 	titlesStr := req.URL.Query().Get("titles")
@@ -197,8 +200,8 @@ func (s *Server) GetAverage(rw http.ResponseWriter, req *http.Request) {
 // @Produce  json
 // @Param titles query string true "Список валют через запятую (пример: BTC,ETH)"
 // @Success 200 {object} dto.CoinDTOList
-// @Failure 400 {object} entities.ErrorResponse
-// @Failure 404 {object} entities.ErrorResponse
+// @Failure 400 {string} string "Пример: invalid params: maximum value is missing"
+// @Failure 404 {string} string "Пример: данные не найдены"
 // @Router /last [get]
 func (s *Server) GetLastRate(rw http.ResponseWriter, req *http.Request) {
 	titlesStr := req.URL.Query().Get("titles")
