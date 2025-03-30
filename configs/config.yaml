@@ -1,0 +1,7 @@
+database:
+  db_name: postgres
+  username: maksimkalinin
+  password: password
+  address: 5432
+
+client_address: https://min-api.cryptocompare.com/data/pricemulti

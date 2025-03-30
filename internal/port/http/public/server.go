@@ -99,9 +99,10 @@ func (s *Server) GetMax(rw http.ResponseWriter, req *http.Request) {
 	rw.WriteHeader(http.StatusOK)
 }
 
-//TODO:   конфиг; миграция бд;
+//TODO:    миграция бд;
 //доделать остальные три метода
 //документация swagger;
+//конфиг;
 
 // GetMin godoc
 // @Summary Получить минимальные курсы
