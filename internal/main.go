@@ -8,6 +8,7 @@ import (
 	"final_course/internal/adapters/storage/postgres"
 	"final_course/internal/cases"
 	"final_course/internal/port/http/public"
+	"fmt"
 	"github.com/spf13/viper"
 	"log"
 	"os"
@@ -28,10 +29,17 @@ func main() {
 	// LoadConfig грузим конфигурацию
 	configs.LoadConfig()
 	dbParams := viper.GetStringMapString("database")
+	// Формируем DSN
+	dsn := fmt.Sprintf("%s://%s:%s@localhost:%s/%s",
+		dbParams["db_name"],
+		dbParams["username"],
+		dbParams["password"],
+		dbParams["address"],
+		dbParams["db_name"],
+	)
 	// Установка переменной окружения
 	//os.Setenv("DATABASE_URL", "postgres://maksimkalinin:password@localhost:5432/postgres")
-	os.Setenv("DATABASE_URL", dbParams["db_name"]+"://"+dbParams["username"]+":"+dbParams["password"]+
-		"@localhost:"+dbParams["address"]+"/"+dbParams["db_name"])
+	os.Setenv("DATABASE_URL", dsn)
 
 	// Создание контекста
 	ctx := context.Background()
