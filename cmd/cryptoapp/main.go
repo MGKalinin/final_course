@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"final_course/configs"
+	"final_course/deploy/configs"
 	_ "final_course/docs"
 	"final_course/internal/adapters/externalclient/cryptocompare"
 	"final_course/internal/adapters/storage/postgres"

@@ -54,8 +54,9 @@ func (s *Server) Run() {
 // @Produce  json
 // @Param titles query string true "Список валют через запятую (пример: BTC,ETH)"
 // @Success 200 {object} dto.CoinDTOList
-// @Failure 400 {string} string "Пример: invalid params: maximum value is missing"
-// @Failure 404 {string} string "Пример: данные не найдены"
+// @Failure 400 //TODO: поудалять строчные аннотации; подобавлять 500 , как ниже
+// @Failure 404
+// @Failure 500
 // @Router /max [get]
 func (s *Server) GetMax(rw http.ResponseWriter, req *http.Request) {
 	// Извлекаем параметр titles из строки запроса
@@ -99,7 +100,7 @@ func (s *Server) GetMax(rw http.ResponseWriter, req *http.Request) {
 	rw.WriteHeader(http.StatusOK)
 }
 
-//TODO:
+//TODO:миграция прописать с создания таблицы- индексы не нужны
 //миграция бд;
 //доделать остальные три метода
 //документация swagger;

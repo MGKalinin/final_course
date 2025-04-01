@@ -35,3 +35,6 @@ http://localhost:8080/swagger/index.html
 
 Для применения миграции:
 goose -dir migrations postgres "user=maksimkalinin dbname=postgres sslmode=disable password=password" up
+
+таймшамп для миграций
+date +%s
