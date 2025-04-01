@@ -99,7 +99,8 @@ func (s *Server) GetMax(rw http.ResponseWriter, req *http.Request) {
 	rw.WriteHeader(http.StatusOK)
 }
 
-//TODO:    миграция бд;
+//TODO:
+//миграция бд;
 //доделать остальные три метода
 //документация swagger;
 //конфиг;
