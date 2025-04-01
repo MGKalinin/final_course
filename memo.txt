@@ -32,3 +32,6 @@ curl "http://localhost:8080/v1/max?titles=BTC"
 
 Документация будет доступна по адресу:
 http://localhost:8080/swagger/index.html
+
+Для применения миграции:
+goose -dir migrations postgres "user=maksimkalinin dbname=postgres sslmode=disable password=password" up
