@@ -54,7 +54,7 @@ func (s *Server) Run() {
 // @Produce  json
 // @Param titles query string true "Список валют через запятую (пример: BTC,ETH)"
 // @Success 200 {object} dto.CoinDTOList
-// @Failure 400 //TODO: поудалять строчные аннотации; подобавлять 500 , как ниже
+// @Failure 400 //
 // @Failure 404
 // @Failure 500
 // @Router /max [get]
@@ -100,12 +100,6 @@ func (s *Server) GetMax(rw http.ResponseWriter, req *http.Request) {
 	rw.WriteHeader(http.StatusOK)
 }
 
-//TODO:миграция прописать с создания таблицы- индексы не нужны
-//миграция бд;
-//доделать остальные три метода
-//документация swagger;
-//конфиг;
-
 // GetMin godoc
 // @Summary Получить минимальные курсы
 // @Description Возвращает минимальные значения курсов для указанных криптовалют
@@ -114,8 +108,9 @@ func (s *Server) GetMax(rw http.ResponseWriter, req *http.Request) {
 // @Produce  json
 // @Param titles query string true "Список валют через запятую (пример: BTC,ETH)"
 // @Success 200 {object} dto.CoinDTOList
-// @Failure 400 {string} string "Пример: invalid params: maximum value is missing"
-// @Failure 404 {string} string "Пример: данные не найдены"
+// @Failure 400
+// @Failure 404
+// @Failure 500
 // @Router /min [get]
 func (s *Server) GetMin(rw http.ResponseWriter, req *http.Request) {
 	titlesStr := req.URL.Query().Get("titles")
@@ -159,8 +154,9 @@ func (s *Server) GetMin(rw http.ResponseWriter, req *http.Request) {
 // @Produce  json
 // @Param titles query string true "Список валют через запятую (пример: BTC,ETH)"
 // @Success 200 {object} dto.CoinDTOList
-// @Failure 400 {string} string "Пример: invalid params: maximum value is missing"
-// @Failure 404 {string} string "Пример: данные не найдены"
+// @Failure 400
+// @Failure 404
+// @Failure 500
 // @Router /avg [get]
 func (s *Server) GetAverage(rw http.ResponseWriter, req *http.Request) {
 	titlesStr := req.URL.Query().Get("titles")
@@ -204,8 +200,9 @@ func (s *Server) GetAverage(rw http.ResponseWriter, req *http.Request) {
 // @Produce  json
 // @Param titles query string true "Список валют через запятую (пример: BTC,ETH)"
 // @Success 200 {object} dto.CoinDTOList
-// @Failure 400 {string} string "Пример: invalid params: maximum value is missing"
-// @Failure 404 {string} string "Пример: данные не найдены"
+// @Failure 400
+// @Failure 404
+// @Failure 500
 // @Router /last [get]
 func (s *Server) GetLastRate(rw http.ResponseWriter, req *http.Request) {
 	titlesStr := req.URL.Query().Get("titles")
