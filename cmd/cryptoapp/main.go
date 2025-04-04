@@ -1,7 +1,8 @@
 package main
 
 import (
-	_ "final_course/docs"
+	"final_course/internal/application"
+	"log"
 )
 
 // Общее описание API
@@ -16,5 +17,9 @@ import (
 // @host localhost:8080
 // @BasePath /v1
 func main() {
+	app := application.NewApp()
 
+	if err := app.Run(); err != nil {
+		log.Fatalf("Application failed to start: %v", err)
+	}
 }

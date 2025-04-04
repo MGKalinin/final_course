@@ -3,15 +3,19 @@ package configs
 import (
 	"github.com/spf13/viper"
 	"log"
+	"path"
+	"runtime"
 )
 
 func LoadConfig() {
-	viper.AddConfigPath("configs")
+	_, filename, _, _ := runtime.Caller(0)
+	dir := path.Dir(filename)
+
+	viper.AddConfigPath(dir)
 	viper.SetConfigName("config")
 	viper.SetConfigType("yaml")
 
-	err := viper.ReadInConfig()
-	if err != nil {
-		log.Fatal(err)
+	if err := viper.ReadInConfig(); err != nil {
+		log.Fatalf("Error reading config: %v", err)
 	}
 }
