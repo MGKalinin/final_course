@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -44,6 +45,10 @@ func (c *Client) Get(ctx context.Context, titles []string) ([]entities.Coin, err
 	query.Set("fsyms", strings.Join(titles, ",")) // Добавлен параметр fsyms
 	query.Set("tsyms", "USD")
 	rawURL.RawQuery = query.Encode()
+	//--------------------------------------
+	// Добавьте это для логирования URL
+	log.Printf("[DEBUG] Request URL: %s", rawURL.String())
+	//--------------------------------------
 
 	// Cоздаём HTTP GET запрос с контекстом
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawURL.String(), nil) // Используем rawURL.String() для создания запроса

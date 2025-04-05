@@ -59,6 +59,9 @@ func (a *App) Run() error {
 
 	// Инициализация клиента
 	client, err := cryptocompare.NewClient(dbParams["client_address"], coinsToFetch)
+	//--------------------------------------
+	log.Printf("Base URL: %s", dbParams["client_address"]) // Добавьте эту строку
+	// --------------------------------------
 	if err != nil {
 		log.Fatalf("Failed to create client: %v", err)
 	}
