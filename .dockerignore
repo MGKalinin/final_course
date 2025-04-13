@@ -1,0 +1,9 @@
+.git
+.env
+**/*.log
+**/__pycache__
+Dockerfile
+docker-compose.yml
+**/*.test
+**/*.swp
+

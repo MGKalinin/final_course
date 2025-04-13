@@ -38,3 +38,19 @@ goose -dir migrations postgres "user=maksimkalinin dbname=postgres sslmode=disab
 
 таймшамп для миграций
 date +%s
+
+# Запуск Docker
+# Перейдите в директорию проекта
+cd final_course
+
+# Собрать и запустить контейнеры
+docker-compose build --no-cache && docker-compose up -d
+
+# Проверить статус
+docker-compose ps
+
+# Просмотр логов приложения
+docker-compose logs app
+
+# Остановить контейнеры
+docker-compose down
