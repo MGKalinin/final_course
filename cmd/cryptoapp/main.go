@@ -23,3 +23,7 @@ func main() {
 		log.Fatalf("Application failed to start: %v", err)
 	}
 }
+
+// TODO: создать .ENV для docker compouse куда положить user pass базы данных туда где лежит docker compouse файл
+//  логин , пароль вернуть
+//  docker файлы не менять

@@ -1,5 +1,5 @@
 database:
-  db_name: postgres
+  db_name: coinbase
   username: maksimkalinin
   password: password
   address: 5432

@@ -44,7 +44,7 @@ func (a *App) Run() error {
 	configs.LoadConfig() // раскомитить
 	dbParams := viper.GetStringMapString("database")
 	// Формируем DSN
-	dsn := fmt.Sprintf("%s://%s:%s@localhost:%s/%s",
+	dsn := fmt.Sprintf("%s://%s:%s@localhost:%s/%s", //TODO: убрать dsn; погуглить ошибку 2025/04/14 08:41:04 Failed to create storage: failed to connect to the database: failed to connect to `host=localhost user=maksimkalinin database=coinbase`: dial error (dial tcp [::1]:5432: connect: connection refused) 2025-04-14T08:41:04.989793011Z exit status 1
 		dbParams["db_name"],
 		dbParams["username"],
 		dbParams["password"],
@@ -67,7 +67,8 @@ func (a *App) Run() error {
 	}
 
 	// Инициализация хранилища
-	storage, err := storage.NewStorage(ctx, os.Getenv("DATABASE_URL"))
+	conString := "postgres://postgres:postgres@localhost:5432/coinbase?sslmode=disable"
+	storage, err := storage.NewStorage(ctx, conString)
 	if err != nil {
 		log.Fatalf("Failed to create storage: %v", err)
 	}
