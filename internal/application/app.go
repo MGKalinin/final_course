@@ -7,7 +7,6 @@ import (
 	storage "final_course/internal/adapters/storage/postgres"
 	"final_course/internal/cases"
 	"final_course/internal/port/http/public"
-	"fmt"
 	"github.com/robfig/cron/v3"
 	"github.com/spf13/viper"
 	"log"
@@ -43,16 +42,9 @@ func (a *App) Run() error {
 
 	configs.LoadConfig() // раскомитить
 	dbParams := viper.GetStringMapString("database")
-	// Формируем DSN
-	dsn := fmt.Sprintf("%s://%s:%s@localhost:%s/%s", //TODO: убрать dsn; погуглить ошибку 2025/04/14 08:41:04 Failed to create storage: failed to connect to the database: failed to connect to `host=localhost user=maksimkalinin database=coinbase`: dial error (dial tcp [::1]:5432: connect: connection refused) 2025-04-14T08:41:04.989793011Z exit status 1
-		dbParams["db_name"],
-		dbParams["username"],
-		dbParams["password"],
-		dbParams["address"],
-		dbParams["db_name"],
-	)
-	// Установка переменной окружения
-	os.Setenv("DATABASE_URL", dsn)
+	//TODO: погуглить ошибку 2025/04/14 08:41:04 Failed to create storage: failed to connect to the database:
+	// failed to connect to `host=localhost user=maksimkalinin database=coinbase`:
+	// dial error (dial tcp [::1]:5432: connect: connection refused) 2025-04-14T08:41:04.989793011Z exit status 1
 
 	// Определение монет для запроса
 	coinsToFetch := []string{"BTC", "ETH", "XRP"}
@@ -67,7 +59,7 @@ func (a *App) Run() error {
 	}
 
 	// Инициализация хранилища
-	conString := "postgres://postgres:postgres@localhost:5432/coinbase?sslmode=disable"
+	conString := "postgres://maksimkalinin:password@db:5432/coinbase?sslmode=disable"
 	storage, err := storage.NewStorage(ctx, conString)
 	if err != nil {
 		log.Fatalf("Failed to create storage: %v", err)
@@ -87,7 +79,7 @@ func (a *App) Run() error {
 
 	// Настройка планировщика задач
 	a.cron = cron.New()
-	_, err = a.cron.AddFunc("@every 5m", func() {
+	_, err = a.cron.AddFunc("@every 1m", func() {
 		log.Println("[CRON] Запуск фонового обновления данных...")
 		if err := service.FetchAndStoreCoins(ctx); err != nil {
 			log.Printf("[CRON] Ошибка обновления: %v", err)
@@ -99,7 +91,7 @@ func (a *App) Run() error {
 		log.Fatalf("Ошибка настройки расписания: %v", err)
 	}
 	a.cron.Start()
-	log.Println("Фоновые задачи запланированы с интервалом 5 минут")
+	log.Println("Фоновые задачи запланированы с интервалом 1 минута")
 
 	// Настройка graceful shutdown
 	quit := make(chan os.Signal, 1)
