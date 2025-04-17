@@ -21,6 +21,17 @@ func NewStorage(ctx context.Context, connString string) (*Storage, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to connect to the database")
 	}
+	// Принудительно создаем таблицу при инициализации
+	_, err = pool.Exec(ctx,
+		`CREATE TABLE IF NOT EXISTS coin_base (
+			title VARCHAR(50) NOT NULL,
+			rate REAL NOT NULL,
+			date TIMESTAMP NOT NULL DEFAULT NOW()
+		)
+	`)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to create coin_base table")
+	}
 	return &Storage{
 		db: pool,
 	}, nil
