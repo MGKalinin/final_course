@@ -59,7 +59,7 @@ func (a *App) Run() error {
 	}
 
 	// Инициализация хранилища
-	conString := "postgres://maksimkalinin:password@db:5433/coinbase?sslmode=disable"
+	conString := "postgres://maksimkalinin:password@db:5432/coinbase?sslmode=disable"
 	storage, err := storage.NewStorage(ctx, conString)
 	if err != nil {
 		log.Fatalf("Failed to create storage: %v", err)
