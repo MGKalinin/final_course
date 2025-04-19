@@ -15,18 +15,6 @@ import (
 	"syscall"
 )
 
-//TO DO: 1.здесь создать все конструкторы ,запускаешь, обрабатываешь все ошибки ,запуск метода сервиса,
-// запрос курсов в фоне(горутина)раз в n времени
-// cron -запускает в фоне
-// 2. в main запуск run
-// TODO: 3. и всё это собрать в докере
-
-//TO DO: 4.перезапустить генерацию документации swag- будет перенесён main и изменилась структура (оставить
-// @Failure 400, @Failure 404, @Failure 500 )
-// убрать русскую анотацию- не обязательно
-
-//эйч навыки собесы по golang
-
 type App struct {
 	server *public.Server
 	cron   *cron.Cron
@@ -42,9 +30,6 @@ func (a *App) Run() error {
 
 	configs.LoadConfig() // раскомитить
 	dbParams := viper.GetStringMapString("database")
-	//TODO: погуглить ошибку 2025/04/14 08:41:04 Failed to create storage: failed to connect to the database:
-	// failed to connect to `host=localhost user=maksimkalinin database=coinbase`:
-	// dial error (dial tcp [::1]:5432: connect: connection refused) 2025-04-14T08:41:04.989793011Z exit status 1
 
 	// Определение монет для запроса
 	coinsToFetch := []string{"BTC", "ETH", "XRP"}

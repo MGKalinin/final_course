@@ -86,7 +86,7 @@ func (s *Server) GetMax(rw http.ResponseWriter, req *http.Request) {
 		dtoList = append(dtoList, dto.CoinDTO{
 			Title: coin.Title,
 			Rate:  coin.Rate,
-			Date:  coin.Date, // TODO: может быть ебота со временем -см на тестах
+			Date:  coin.Date,
 		})
 	}
 
