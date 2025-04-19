@@ -106,7 +106,8 @@ func (s *Storage) Get(ctx context.Context, titles []string, opts ...cases.Option
 	case cases.Avg:
 		query = `SELECT title, AVG(rate) as rate, MAX(date) as date FROM coin_base WHERE title = ANY($1) GROUP BY title`
 	default:
-		query = `SELECT DISTINCT ON (title) title, rate, date FROM coin_base WHERE title = ANY($1) ORDER BY title, rate, date`
+		// query = `SELECT DISTINCT ON (title) title, rate, date FROM coin_base WHERE title = ANY($1) ORDER BY title, rate, date`
+		query = `SELECT DISTINCT ON (title) title, rate, date FROM coin_base WHERE title = ANY($1) ORDER BY title, title, date DESC`
 	}
 
 	rows, err := s.db.Query(ctx, query, titles)
