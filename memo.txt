@@ -29,6 +29,7 @@ SELECT * FROM coin_base;
 
 # Запрос для одной монеты
 curl "http://localhost:8080/v1/max?titles=BTC"
+http://localhost:8080/v1/last?titles=PI,BTC
 
 Документация будет доступна по адресу:
 http://localhost:8080/swagger/index.html

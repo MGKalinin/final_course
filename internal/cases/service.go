@@ -67,6 +67,22 @@ func (a AggFunc) String() string {
 	return [...]string{"", "MAX", "MIN", "AVG"}[a]
 }
 
+// Вспомогательная функция для поиска отсутствующих монет
+func findMissingTitles(requested, existing []string) []string {
+	existingSet := make(map[string]struct{})
+	for _, title := range existing {
+		existingSet[title] = struct{}{}
+	}
+
+	var missing []string
+	for _, title := range requested {
+		if _, ok := existingSet[title]; !ok {
+			missing = append(missing, title)
+		}
+	}
+	return missing
+}
+
 // WithMaxFunc функция получения max значения
 func WithMaxFunc() Option {
 	return func(options *Options) {
@@ -74,13 +90,30 @@ func WithMaxFunc() Option {
 	}
 }
 
-// GetMaxRate метод получения max значения
+// GetMaxRate возвращает максимальные значения, автоматически запрашивая отсутствующие монеты
 func (s *Service) GetMaxRate(ctx context.Context, titles []string) ([]entities.Coin, error) {
-	coins, err := s.storage.Get(ctx, titles, WithMaxFunc())
+	// Получаем все существующие монеты из БД
+	existingTitles, err := s.storage.GetAllTitles(ctx)
 	if err != nil {
-		return nil, errors.Wrap(entities.ErrorInvalidParams, "maximum value is missing")
+		return nil, errors.Wrap(err, "failed to get existing titles")
 	}
-	return coins, nil
+
+	// Определяем отсутствующие монеты
+	missing := findMissingTitles(titles, existingTitles)
+
+	// Запрашиваем и сохраняем отсутствующие
+	if len(missing) > 0 {
+		coins, err := s.client.Get(ctx, missing)
+		if err != nil {
+			return nil, errors.Wrap(err, "client failed to fetch missing coins")
+		}
+		if err := s.storage.Store(ctx, coins); err != nil {
+			return nil, errors.Wrap(err, "failed to store new coins")
+		}
+	}
+
+	// Возвращаем данные из хранилища
+	return s.storage.Get(ctx, titles, WithMaxFunc())
 }
 
 // WithMinFunc функция получения min значения
@@ -90,13 +123,25 @@ func WithMinFunc() Option {
 	}
 }
 
-// GetMinRate метод получения min значения
+// GetMinRate возвращает минимальные значения, автоматически запрашивая отсутствующие монеты
 func (s *Service) GetMinRate(ctx context.Context, titles []string) ([]entities.Coin, error) {
-	coins, err := s.storage.Get(ctx, titles, WithMinFunc())
+	existingTitles, err := s.storage.GetAllTitles(ctx)
 	if err != nil {
-		return nil, errors.Wrap(entities.ErrorInvalidParams, "minimum value is missing")
+		return nil, errors.Wrap(err, "failed to get existing titles")
 	}
-	return coins, nil
+
+	missing := findMissingTitles(titles, existingTitles)
+	if len(missing) > 0 {
+		coins, err := s.client.Get(ctx, missing)
+		if err != nil {
+			return nil, errors.Wrap(err, "client failed to fetch missing coins")
+		}
+		if err := s.storage.Store(ctx, coins); err != nil {
+			return nil, errors.Wrap(err, "failed to store new coins")
+		}
+	}
+
+	return s.storage.Get(ctx, titles, WithMinFunc())
 }
 
 // WithAvgFunc функция получения avg значения
@@ -106,20 +151,45 @@ func WithAvgFunc() Option {
 	}
 }
 
-// GetAvgRate метод получения avg значения
+// GetAvgRate возвращает средние значения, автоматически запрашивая отсутствующие монеты
 func (s *Service) GetAvgRate(ctx context.Context, titles []string) ([]entities.Coin, error) {
-	coins, err := s.storage.Get(ctx, titles, WithAvgFunc())
+	existingTitles, err := s.storage.GetAllTitles(ctx)
 	if err != nil {
-		return nil, errors.Wrap(entities.ErrorInvalidParams, "average value is missing")
+		return nil, errors.Wrap(err, "failed to get existing titles")
 	}
-	return coins, nil
+
+	missing := findMissingTitles(titles, existingTitles)
+	if len(missing) > 0 {
+		coins, err := s.client.Get(ctx, missing)
+		if err != nil {
+			return nil, errors.Wrap(err, "client failed to fetch missing coins")
+		}
+		if err := s.storage.Store(ctx, coins); err != nil {
+			return nil, errors.Wrap(err, "failed to store new coins")
+		}
+	}
+
+	return s.storage.Get(ctx, titles, WithAvgFunc())
 }
 
-// GetLastRates метод получения значений без опций
+// GetLastRates возвращает последние значения, автоматически запрашивая отсутствующие монеты
 func (s *Service) GetLastRates(ctx context.Context, titles []string) ([]entities.Coin, error) {
-	coins, err := s.storage.Get(ctx, titles)
+	existingTitles, err := s.storage.GetAllTitles(ctx)
 	if err != nil {
-		return nil, errors.Wrap(entities.ErrorInvalidParams, "last value is missing")
+		return nil, errors.Wrap(err, "failed to get existing titles")
 	}
-	return coins, nil
+
+	missing := findMissingTitles(titles, existingTitles)
+	if len(missing) > 0 {
+		coins, err := s.client.Get(ctx, missing)
+		if err != nil {
+			return nil, errors.Wrap(err, "client failed to fetch missing coins")
+		}
+		if err := s.storage.Store(ctx, coins); err != nil {
+			return nil, errors.Wrap(err, "failed to store new coins")
+		}
+	}
+
+	// Вызов без опций для получения последних значений
+	return s.storage.Get(ctx, titles)
 }
